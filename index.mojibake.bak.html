@@ -1,0 +1,1333 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wunmental</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0e0e0e;--bg2:#141414;--card:#1a1a1a;--card2:#222222;--card3:#2a2a2a;
+  --orange:#ff6b35;--orange2:#ff8c5a;--orange3:rgba(255,107,53,0.12);--orange4:rgba(255,107,53,0.25);
+  --grey:#888;--grey2:#555;--text:#f0f0f0;--muted:#666;
+  --border:rgba(255,255,255,0.06);--border2:rgba(255,107,53,0.2);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+ 
+#stealth-btn{position:fixed;bottom:1.2rem;left:1.2rem;z-index:9999;width:36px;height:36px;border-radius:10px;background:var(--card2);border:1px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;opacity:.4;transition:opacity .2s;color:var(--grey);}
+#stealth-btn:hover{opacity:1;}
+#sos-btn{position:fixed;bottom:1.2rem;right:1.2rem;z-index:9999;padding:.5rem 1rem;border-radius:12px;background:rgba(255,60,60,.15);border:1px solid rgba(255,60,60,.3);color:#ff6060;font-family:'Syne',sans-serif;font-weight:700;font-size:.8rem;cursor:pointer;transition:all .2s;}
+#sos-btn:hover{background:rgba(255,60,60,.25);}
+#sos-overlay{position:fixed;inset:0;z-index:9998;background:rgba(10,10,10,.97);display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:2rem;}
+#sos-overlay.active{display:flex;}
+.breath-circle{width:160px;height:160px;border-radius:50%;background:rgba(255,107,53,.15);border:2px solid var(--orange);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;color:var(--orange);margin:2rem auto;animation:breathe 8s ease-in-out infinite;}
+@keyframes breathe{0%,100%{transform:scale(1);opacity:.7}50%{transform:scale(1.4);opacity:1}}
+.breath-text{font-size:.85rem;color:var(--muted);margin-bottom:2rem;}
+.sos-phone{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;color:var(--orange);margin:.5rem 0;}
+
+#mood-gate{position:fixed;inset:0;z-index:500;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:2rem;transition:opacity .6s,transform .6s;}
+#mood-gate.hide{opacity:0;transform:scale(1.03);pointer-events:none;}
+.gate-logo{font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;color:var(--orange);margin-bottom:3rem;letter-spacing:-1px;}
+.gate-q{font-family:'Syne',sans-serif;font-size:clamp(1.8rem,5vw,3rem);font-weight:800;margin-bottom:.5rem;line-height:1.1;}
+.gate-sub{color:var(--muted);font-size:.95rem;margin-bottom:2.5rem;}
+.gate-moods{display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap;margin-bottom:2.5rem;}
+.gate-mood{display:flex;flex-direction:column;align-items:center;gap:.5rem;padding:1.2rem .9rem;border-radius:18px;width:86px;border:2px solid var(--border);background:var(--card2);cursor:pointer;transition:all .2s;}
+.gate-mood:hover,.gate-mood.sel{border-color:var(--orange);background:var(--orange3);transform:translateY(-4px);}
+.gate-mood-emoji{font-size:2rem;}
+.gate-mood-label{font-size:.72rem;color:var(--muted);}
+.gate-mood.sel .gate-mood-label{color:var(--orange2);}
+.gate-btn{padding:.9rem 2.5rem;border-radius:14px;background:var(--orange);color:white;font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;border:none;cursor:pointer;transition:all .2s;opacity:.25;pointer-events:none;}
+.gate-btn.on{opacity:1;pointer-events:all;}
+.gate-btn.on:hover{background:var(--orange2);transform:translateY(-2px);}
+ 
+#app{opacity:0;transition:opacity .5s;pointer-events:none;}
+#app.on{opacity:1;pointer-events:all;}
+ 
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:.9rem 1.4rem;background:rgba(14,14,14,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);}
+.logo{font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;color:var(--orange);letter-spacing:-0.5px;}
+.nav-links{display:none;}
+.nl{padding:.4rem .9rem;border-radius:10px;font-size:.82rem;color:var(--muted);cursor:pointer;transition:all .2s;border:1px solid transparent;}
+.nl:hover,.nl.on{color:var(--text);border-color:var(--border);background:var(--card2);}
+.nl.on{color:var(--orange);}
+.page{display:none;padding-top:5.4rem;min-height:100vh;padding-left:7rem;}
+.page.on{display:block;}
+.menu-btn{width:44px;height:44px;border-radius:12px;border:1px solid var(--border);background:var(--card2);display:flex;align-items:center;justify-content:center;cursor:pointer;gap:4px;flex-direction:column;}
+.menu-btn span{display:block;width:18px;height:2px;background:var(--text);border-radius:999px;}
+.menu-drawer{position:fixed;top:4.7rem;right:1rem;z-index:150;width:min(280px,calc(100vw - 2rem));background:var(--card);border:1px solid var(--border);border-radius:18px;padding:.8rem;display:none;box-shadow:0 20px 60px rgba(0,0,0,.28);}
+.menu-drawer.on{display:block;}
+.drawer-link{display:block;width:100%;text-align:left;padding:.85rem 1rem;border:none;background:transparent;border-radius:12px;color:var(--text);cursor:pointer;font:inherit;}
+.drawer-link:hover,.drawer-link.on{background:var(--card2);color:var(--orange2);}
+.left-rail{position:fixed;top:5.4rem;left:0;bottom:0;width:86px;padding:1rem .8rem;display:flex;flex-direction:column;gap:.7rem;border-right:1px solid var(--border);background:rgba(14,14,14,.72);backdrop-filter:blur(20px);z-index:90;}
+.rail-item{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.35rem;padding:.7rem .45rem;border-radius:16px;border:1px solid transparent;background:transparent;color:var(--muted);cursor:pointer;font-size:.72rem;text-align:center;transition:all .2s;line-height:1.2;}
+.rail-item:hover,.rail-item.on{background:var(--card2);border-color:var(--border);color:var(--orange2);}
+.rail-icon{font-size:1.2rem;}
+.stats-row{display:none;}
+.auth-soon{position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.65);display:none;align-items:center;justify-content:center;padding:1rem;}
+.auth-soon.on{display:flex;}
+.auth-card{width:min(480px,100%);background:var(--card);border:1px solid var(--border);border-radius:18px;padding:1.4rem;}
+.auth-title{font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:700;margin-bottom:.35rem;}
+.auth-sub{font-size:.86rem;color:var(--muted);line-height:1.5;margin-bottom:1rem;}
+.auth-field{display:flex;flex-direction:column;gap:.35rem;margin-bottom:.75rem;}
+.auth-field label{font-size:.78rem;color:var(--muted);}
+.auth-field input{padding:.75rem .9rem;border-radius:12px;background:var(--card2);border:1px solid var(--border);color:var(--text);outline:none;}
+.auth-field input:focus{border-color:var(--orange);}
+.auth-note{margin-top:.7rem;font-size:.78rem;color:var(--orange2);}
+ 
+.home-hero{min-height:88vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:2rem;position:relative;overflow:hidden;}
+.hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 60%,rgba(255,107,53,.07) 0%,transparent 70%);pointer-events:none;}
+.mood-badge{display:inline-flex;align-items:center;gap:.5rem;padding:.45rem 1.1rem;border-radius:20px;background:var(--orange3);border:1px solid var(--border2);font-size:.85rem;color:var(--orange2);margin-bottom:1.8rem;}
+.hero-title{font-family:'Syne',sans-serif;font-size:clamp(2rem,7vw,4.8rem);font-weight:800;line-height:1.05;letter-spacing:-2px;margin-bottom:1rem;}
+.hero-title span{color:var(--orange);}
+.hero-sub{font-size:1rem;color:var(--muted);max-width:440px;line-height:1.7;margin-bottom:2.5rem;}
+.cta-row{display:flex;gap:.8rem;flex-wrap:wrap;justify-content:center;margin-bottom:3rem;}
+.btn{padding:.75rem 1.6rem;border-radius:12px;font-family:'Syne',sans-serif;font-weight:700;font-size:.9rem;cursor:pointer;border:none;transition:all .2s;}
+.btn-o{background:var(--orange);color:white;}
+.btn-o:hover{background:var(--orange2);transform:translateY(-2px);}
+.btn-g{background:transparent;color:var(--text);border:1px solid var(--border);}
+.btn-g:hover{border-color:var(--orange);color:var(--orange2);}
+ 
+.tracker-wrap{max-width:700px;width:100%;margin:0 auto;padding:0 2rem 4rem;}
+.tracker-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:1.5rem;}
+.tracker-title{font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;margin-bottom:1.2rem;display:flex;align-items:center;gap:.5rem;}
+.tracker-title span{width:8px;height:8px;border-radius:50%;background:var(--orange);display:inline-block;}
+.tracker-graph{height:80px;position:relative;margin-bottom:1rem;}
+.tracker-days{display:flex;justify-content:space-between;}
+.tracker-day{text-align:center;font-size:.7rem;color:var(--muted);}
+.graph-line{position:absolute;top:0;left:0;width:100%;height:100%;}
+.stats-row{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;padding:0 2rem 3rem;max-width:820px;margin:0 auto;}
+.stat-c{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.2rem 1.5rem;text-align:center;flex:1;min-width:130px;}
+.stat-n{font-family:'Syne',sans-serif;font-size:1.9rem;font-weight:800;color:var(--orange);}
+.stat-l{font-size:.78rem;color:var(--muted);margin-top:.3rem;}
+ 
+.ph{text-align:center;padding:2rem 2rem 1.5rem;}
+.pt{font-family:'Syne',sans-serif;font-size:1.9rem;font-weight:800;margin-bottom:.4rem;}
+.ps{color:var(--muted);font-size:.9rem;}
+.tests-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem;padding:1rem 2rem 3rem;max-width:960px;margin:0 auto;}
+.test-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:1.4rem;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;}
+.test-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--orange);opacity:0;transition:opacity .2s;}
+.test-card:hover{border-color:var(--border2);transform:translateY(-3px);}
+.test-card:hover::before{opacity:1;}
+.test-badge{display:inline-block;padding:.2rem .6rem;border-radius:6px;font-size:.68rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;margin-bottom:.8rem;}
+.badge-sci{background:rgba(255,107,53,.15);color:var(--orange2);}
+.badge-own{background:rgba(100,100,255,.12);color:#a0a0ff;}
+.test-icon{font-size:1.8rem;margin-bottom:.6rem;}
+.test-name{font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;margin-bottom:.3rem;}
+.test-desc{font-size:.82rem;color:var(--muted);line-height:1.5;}
+.test-meta{margin-top:.8rem;font-size:.72rem;color:var(--orange2);font-weight:500;}
+ 
+.quiz-wrap{max-width:620px;margin:0 auto;padding:0 2rem 3rem;display:none;}
+.quiz-wrap.on{display:block;}
+.back-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:.85rem;margin-bottom:1rem;display:flex;align-items:center;gap:.3rem;}
+.back-btn:hover{color:var(--text);}
+.quiz-card{background:var(--card);border:1px solid var(--border);border-radius:22px;padding:2rem;}
+.qprog{display:flex;gap:.3rem;margin-bottom:1.5rem;}
+.qd{height:3px;flex:1;border-radius:2px;background:var(--border);transition:background .3s;}
+.qd.done{background:var(--orange);}
+.q-label{font-size:.72rem;color:var(--orange2);font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:.6rem;}
+.q-text{font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;margin-bottom:1.4rem;line-height:1.4;color:var(--muted);}
+.q-opts{display:flex;flex-direction:column;gap:.6rem;}
+.q-opt{padding:.85rem 1.1rem;border-radius:12px;border:1px solid var(--border);background:var(--card2);cursor:pointer;transition:all .2s;font-size:.9rem;text-align:left;color:var(--text);display:flex;gap:.8rem;align-items:center;}
+.q-opt:hover{border-color:var(--orange);color:var(--orange2);}
+.q-opt.sel{border-color:var(--orange);background:var(--orange3);color:var(--orange2);}
+.q-num{width:22px;height:22px;border-radius:6px;background:var(--card3);font-size:.75rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--muted);}
+.q-opt.sel .q-num{background:var(--orange);color:white;}
+.q-nav{display:flex;justify-content:space-between;align-items:center;margin-top:1.4rem;}
+.q-counter{font-size:.82rem;color:var(--muted);}
+.r-wrap{text-align:center;padding:.5rem 0;}
+.r-emoji{font-size:3.5rem;margin-bottom:1rem;}
+.r-score{font-family:'Syne',sans-serif;font-size:.8rem;font-weight:700;color:var(--orange2);letter-spacing:1px;text-transform:uppercase;margin-bottom:.4rem;}
+.r-title{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;margin-bottom:.6rem;}
+.r-text{color:var(--muted);line-height:1.65;margin-bottom:1.5rem;font-size:.95rem;}
+.r-routes{display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap;margin-bottom:1.5rem;}
+.route-btn{padding:.65rem 1.2rem;border-radius:12px;font-family:'Syne',sans-serif;font-weight:700;font-size:.82rem;cursor:pointer;border:none;transition:all .2s;display:flex;align-items:center;gap:.4rem;}
+.route-urgent{background:rgba(255,60,60,.15);color:#ff7070;border:1px solid rgba(255,60,60,.25);}
+.route-self{background:var(--orange3);color:var(--orange2);border:1px solid var(--border2);}
+.route-talk{background:rgba(100,200,150,.1);color:#80d9a0;border:1px solid rgba(100,200,150,.2);}
+.r-section{text-align:left;margin-bottom:1rem;}
+.r-sec-title{font-size:.72rem;color:var(--orange2);font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:.5rem;}
+.r-tip{display:flex;gap:.7rem;padding:.75rem;background:var(--card2);border-radius:10px;margin-bottom:.35rem;font-size:.87rem;line-height:1.4;}
+ 
+.myths-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1rem;padding:1rem 2rem 3rem;max-width:960px;margin:0 auto;}
+.myth-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:1.3rem;cursor:pointer;min-height:160px;transition:all .2s;}
+.myth-card:hover{border-color:var(--border2);}
+.myth-card.flipped .myth-front{display:none;}
+.myth-card.flipped .myth-back{display:block;}
+.myth-card .myth-back{display:none;}
+.myth-tag{font-size:.68rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:.7rem;}
+.myth-tag.m{color:#ff9090;}
+.myth-tag.f{color:#80d9a0;}
+.myth-text{font-size:.9rem;line-height:1.5;}
+.myth-hint{font-size:.7rem;color:var(--muted);margin-top:.8rem;}
+.myth-card.flipped{background:rgba(100,200,150,.06);border-color:rgba(100,200,150,.2);}
+ 
+.wins-wrap{max-width:500px;margin:0 auto;padding:1rem 2rem 3rem;text-align:center;}
+.wins-card{background:var(--card);border:1px solid var(--border);border-radius:22px;padding:2.5rem 2rem;margin-bottom:1.5rem;}
+.wins-task{font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:700;margin-bottom:.5rem;min-height:2rem;}
+.wins-sub{color:var(--muted);font-size:.9rem;margin-bottom:1.5rem;}
+.wins-done{display:flex;gap:1rem;justify-content:center;margin-top:1rem;}
+.ach-badge{display:inline-flex;align-items:center;gap:.4rem;padding:.4rem .9rem;border-radius:20px;background:var(--orange3);border:1px solid var(--border2);font-size:.8rem;color:var(--orange2);font-weight:600;}
+ 
+.help-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem;padding:1rem 2rem 3rem;max-width:960px;margin:0 auto;}
+.help-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:1.4rem;}
+.help-type{font-size:.68rem;letter-spacing:1.5px;font-weight:600;color:var(--muted);margin-bottom:.7rem;text-transform:uppercase;}
+.help-name{font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;margin-bottom:.3rem;}
+.help-desc{font-size:.83rem;color:var(--muted);margin-bottom:.9rem;line-height:1.5;}
+.help-phone{display:block;padding:.65rem 1rem;border-radius:11px;background:var(--orange3);border:1px solid var(--border2);font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;color:var(--orange2);text-align:center;margin-bottom:.4rem;transition:all .2s;cursor:pointer;}
+.help-phone:hover{background:var(--orange4);}
+.help-hrs{font-size:.72rem;color:var(--muted);text-align:center;}
+.sos-banner{margin:1rem auto 1.5rem;background:rgba(255,60,60,.08);border:1px solid rgba(255,60,60,.2);border-radius:18px;padding:1.3rem 1.5rem;max-width:920px;display:flex;gap:1rem;align-items:center;flex-wrap:wrap;}
+.sos-t h3{font-family:'Syne',sans-serif;font-weight:700;color:#ff7070;margin-bottom:.2rem;font-size:.95rem;}
+.sos-t p{font-size:.82rem;color:var(--muted);}
+.sos-n{font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;color:#ff7070;margin-left:auto;}
+ 
+.chat-wrap{max-width:620px;margin:0 auto;padding:1rem 2rem;display:flex;flex-direction:column;height:calc(100vh - 5rem);}
+.chat-hdr{display:flex;align-items:center;gap:.9rem;padding:1rem;background:var(--card);border:1px solid var(--border);border-radius:14px;margin-bottom:.9rem;}
+.bot-av{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,var(--orange),#ff9f60);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;}
+.bot-nm{font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem;}
+.bot-st{font-size:.75rem;color:var(--orange2);}
+.chat-msgs{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:.7rem;padding:.3rem 0;margin-bottom:.8rem;}
+.msg{max-width:80%;padding:.85rem 1rem;border-radius:14px;font-size:.9rem;line-height:1.5;animation:mIn .25s ease;}
+@keyframes mIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.msg.bot{background:var(--card);border:1px solid var(--border);align-self:flex-start;border-bottom-left-radius:3px;}
+.msg.user{background:var(--orange);color:white;align-self:flex-end;border-bottom-right-radius:3px;}
+.chat-q{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:.7rem;}
+.qb{padding:.35rem .8rem;border-radius:20px;border:1px solid var(--border);background:var(--card2);font-size:.78rem;cursor:pointer;transition:all .2s;color:var(--text);}
+.qb:hover{border-color:var(--orange);color:var(--orange2);}
+.chat-ir{display:flex;gap:.4rem;}
+.chat-in{flex:1;padding:.85rem 1.1rem;border-radius:12px;background:var(--card);border:1px solid var(--border);color:var(--text);font-size:.9rem;font-family:'Inter',sans-serif;outline:none;transition:border-color .2s;}
+.chat-in:focus{border-color:var(--orange);}
+.chat-in::placeholder{color:var(--muted);}
+.chat-sb{width:44px;height:44px;border-radius:12px;background:var(--orange);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;color:white;transition:all .2s;flex-shrink:0;}
+.chat-sb:hover{background:var(--orange2);}
+.typing{display:flex;gap:4px;padding:.85rem 1rem;background:var(--card);border:1px solid var(--border);border-radius:14px;border-bottom-left-radius:3px;align-self:flex-start;}
+.typing span{width:5px;height:5px;border-radius:50%;background:var(--muted);animation:bo 1.2s infinite;}
+.typing span:nth-child(2){animation-delay:.2s;}
+.typing span:nth-child(3){animation-delay:.4s;}
+@keyframes bo{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-5px)}}
+ 
+.close-btn{margin-top:2rem;padding:.6rem 1.5rem;border-radius:12px;background:var(--card2);border:1px solid var(--border);color:var(--muted);cursor:pointer;font-size:.85rem;}
+.theme-toggle{padding:.45rem .9rem;border-radius:10px;border:1px solid var(--border);background:var(--card2);color:var(--text);cursor:pointer;font-family:'Syne',sans-serif;font-size:.8rem;font-weight:700;transition:all .2s;}
+.theme-toggle:hover{border-color:var(--orange);color:var(--orange2);}
+.feature-wrap{max-width:1100px;margin:0 auto;padding:1rem 2rem 3rem;}
+.feature-grid,.groups-grid,.story-list,.support-list,.roadmap-grid,.focus-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem;}
+.feature-card,.story-card,.support-card,.digest-card,.focus-card,.roadmap-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:1.3rem;}
+.feature-kicker{font-size:.7rem;letter-spacing:1px;text-transform:uppercase;color:var(--orange2);margin-bottom:.65rem;font-weight:700;}
+.feature-title{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;margin-bottom:.45rem;}
+.feature-text{font-size:.86rem;line-height:1.6;color:var(--muted);}
+.group-pill{display:inline-flex;align-items:center;gap:.45rem;padding:.45rem .8rem;border-radius:999px;background:var(--orange3);border:1px solid var(--border2);color:var(--orange2);font-size:.8rem;font-weight:600;margin:.25rem .35rem .25rem 0;}
+.story-form textarea,.support-form textarea,.diary-area{width:100%;padding:1rem 1.1rem;border-radius:16px;background:var(--card2);border:1px solid var(--border);color:var(--text);font:inherit;outline:none;resize:vertical;min-height:130px;}
+.story-form textarea:focus,.support-form textarea:focus,.diary-area:focus{border-color:var(--orange);}
+.inline-actions{display:flex;gap:.7rem;flex-wrap:wrap;margin-top:1rem;}
+.story-meta,.support-meta,.diary-meta,.focus-meta{font-size:.76rem;color:var(--muted);}
+.story-body,.support-body{margin:.8rem 0 1rem;line-height:1.65;color:var(--text);}
+.reaction-row,.preset-row,.focus-links{display:flex;gap:.45rem;flex-wrap:wrap;}
+.reaction-btn,.preset-btn,.focus-link{padding:.42rem .8rem;border-radius:999px;border:1px solid var(--border);background:var(--card2);color:var(--text);cursor:pointer;transition:all .2s;text-decoration:none;}
+.reaction-btn:hover,.preset-btn:hover,.focus-link:hover{border-color:var(--orange);transform:translateY(-1px);color:var(--orange2);}
+.diary-shell{max-width:900px;margin:0 auto;padding:1rem 2rem 3rem;}
+.diary-card{background:var(--card);border:1px solid var(--border);border-radius:22px;padding:1.5rem;}
+.diary-toolbar{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;align-items:center;margin-bottom:1rem;}
+.diary-note{margin-top:1rem;padding:1rem 1.1rem;border-radius:14px;background:rgba(100,200,150,.08);border:1px solid rgba(100,200,150,.16);font-size:.84rem;color:#9bd6b0;}
+.focus-timer{font-family:'Syne',sans-serif;font-size:clamp(2.4rem,8vw,4rem);font-weight:800;letter-spacing:-2px;margin:.7rem 0;}
+.digest-big{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;color:var(--orange);}
+.roadmap-card{position:relative;overflow:hidden;}
+.roadmap-card::before{content:'РЎРєРѕСЂРѕ';position:absolute;top:1rem;right:1rem;padding:.25rem .55rem;border-radius:999px;background:var(--orange3);border:1px solid var(--border2);color:var(--orange2);font-size:.66rem;font-weight:700;letter-spacing:.6px;text-transform:uppercase;}
+.roadmap-card .test-name{padding-right:3.4rem;}
+body.light{
+  --bg:#f7f2ea;--bg2:#fff7ef;--card:#fffdf8;--card2:#f4ede4;--card3:#eadfce;
+  --orange:#d25b24;--orange2:#f07a43;--orange3:rgba(210,91,36,0.1);--orange4:rgba(210,91,36,0.18);
+  --grey:#85776d;--grey2:#bcae9d;--text:#241a14;--muted:#6d5d52;
+  --border:rgba(36,26,20,0.08);--border2:rgba(210,91,36,0.22);
+}
+body.light nav{background:rgba(247,242,234,.9);}
+body.light #sos-overlay{background:rgba(247,242,234,.96);}
+body.light .msg.user{color:#fff;}
+body.light .left-rail{background:rgba(247,242,234,.75);}
+@media (max-width:760px){
+  nav{padding:.8rem 1rem;}
+  .chat-wrap{height:auto;min-height:calc(100vh - 5rem);}
+  .diary-toolbar{align-items:flex-start;}
+  .left-rail{width:100%;height:auto;top:auto;bottom:0;left:0;right:0;border-right:none;border-top:1px solid var(--border);flex-direction:row;justify-content:space-around;padding:.55rem;}
+  .page{padding-left:0;padding-bottom:5.5rem;}
+  .rail-item{flex:1;}
+}
+::-webkit-scrollbar{width:3px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+</style>
+</head>
+<body>
+ 
+<button id="stealth-btn" title="Р‘С‹СЃС‚СЂС‹Р№ РІС‹С…РѕРґ (Esc)" onclick="stealth()">рџ‘Ѓ</button>
+<button id="sos-btn" onclick="toggleSOS()">рџ† SOS</button>
+ 
+<div id="sos-overlay">
+  <h2 style="font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:800;margin-bottom:.3rem;">Р”С‹С€Рё РІРјРµСЃС‚Рµ СЃ РєСЂСѓРіРѕРј</h2>
+  <p style="color:var(--muted);font-size:.9rem;">Р’РґРѕС… РїРѕРєР° РєСЂСѓРі СЂР°СЃС‚С‘С‚ вЂ” РІС‹РґРѕС… РїРѕРєР° СЃР¶РёРјР°РµС‚СЃСЏ</p>
+  <div class="breath-circle">РґС‹С€Рё</div>
+  <p class="breath-text">Р”РµР»Р°Р№ СЌС‚Рѕ 3вЂ“5 СЂР°Р·. РџР°РЅРёС‡РµСЃРєР°СЏ Р°С‚Р°РєР° РѕС‚СЃС‚СѓРїРёС‚.</p>
+  <div style="margin-bottom:.5rem;font-size:.85rem;color:var(--muted);">Р•СЃР»Рё РЅСѓР¶РЅР° РїРѕРјРѕС‰СЊ РїСЂСЏРјРѕ СЃРµР№С‡Р°СЃ:</div>
+  <div class="sos-phone">8-800-2000-122</div>
+  <div style="font-size:.8rem;color:var(--muted);margin-bottom:1.5rem;">Р‘РµСЃРїР»Р°С‚РЅРѕ В· РљСЂСѓРіР»РѕСЃСѓС‚РѕС‡РЅРѕ</div>
+  <button onclick="toggleSOS()" class="close-btn">Р—Р°РєСЂС‹С‚СЊ</button>
+</div>
+ 
+<div class="auth-soon" id="authSoon">
+  <div class="auth-card">
+    <div class="auth-title">Р’С…РѕРґ РІ Р°РєРєР°СѓРЅС‚</div>
+    <div class="auth-sub" id="authSoonReason">Р”Р»СЏ СЌС‚РѕРіРѕ РґРµР№СЃС‚РІРёСЏ РЅСѓР¶РµРЅ РІС…РѕРґ. Р¤СѓРЅРєС†РёСЏ Р°РІС‚РѕСЂРёР·Р°С†РёРё Р±СѓРґРµС‚ РґРѕР±Р°РІР»РµРЅР° РІ Р±Р»РёР¶Р°Р№С€РµРј РѕР±РЅРѕРІР»РµРЅРёРё.</div>
+    <div class="auth-field">
+      <label for="authLogin">Р›РѕРіРёРЅ</label>
+      <input id="authLogin" type="text" placeholder="Р’РІРµРґРёС‚Рµ Р»РѕРіРёРЅ">
+    </div>
+    <div class="auth-field">
+      <label for="authPassword">РџР°СЂРѕР»СЊ</label>
+      <input id="authPassword" type="password" placeholder="Р’РІРµРґРёС‚Рµ РїР°СЂРѕР»СЊ">
+    </div>
+    <div class="inline-actions" style="margin-top:.4rem;">
+      <button class="btn btn-o" onclick="submitAuthSoon()">Р’РѕР№С‚Рё</button>
+      <button class="btn btn-g" onclick="closeAuthSoon()">Р—Р°РєСЂС‹С‚СЊ</button>
+    </div>
+    <div class="auth-note">РљР°Р±РёРЅРµС‚С‹ СѓС‡РµРЅРёРєР° Рё СѓС‡РёС‚РµР»СЏ СЃРєРѕСЂРѕ.</div>
+  </div>
+</div>
+ 
+<div id="mood-gate">
+  <div class="gate-logo">wunmental</div>
+  <h1 class="gate-q">РљР°Рє С‚С‹ СЃРµРіРѕРґРЅСЏ?</h1>
+  <p class="gate-sub">Р’С‹Р±РµСЂРё РЅР°СЃС‚СЂРѕРµРЅРёРµ вЂ” РјС‹ РїРѕРґР±РµСЂС‘Рј С‡С‚Рѕ С‚РµР±Рµ РЅСѓР¶РЅРѕ</p>
+  <div class="gate-moods">
+    <div class="gate-mood" onclick="pickMood(this,'РѕС‚Р»РёС‡РЅРѕ','рџ„')"><div class="gate-mood-emoji">рџ„</div><div class="gate-mood-label">РѕС‚Р»РёС‡РЅРѕ</div></div>
+    <div class="gate-mood" onclick="pickMood(this,'С…РѕСЂРѕС€Рѕ','рџ™‚')"><div class="gate-mood-emoji">рџ™‚</div><div class="gate-mood-label">С…РѕСЂРѕС€Рѕ</div></div>
+    <div class="gate-mood" onclick="pickMood(this,'РЅРѕСЂРјР°Р»СЊРЅРѕ','рџђ')"><div class="gate-mood-emoji">рџђ</div><div class="gate-mood-label">РЅРѕСЂРјР°Р»СЊРЅРѕ</div></div>
+    <div class="gate-mood" onclick="pickMood(this,'РїР»РѕС…Рѕ','рџ”')"><div class="gate-mood-emoji">рџ”</div><div class="gate-mood-label">РїР»РѕС…Рѕ</div></div>
+    <div class="gate-mood" onclick="pickMood(this,'С‚СЂРµРІРѕР¶РЅРѕ','рџ°')"><div class="gate-mood-emoji">рџ°</div><div class="gate-mood-label">С‚СЂРµРІРѕР¶РЅРѕ</div></div>
+  </div>
+  <button class="gate-btn" id="gateBtn" onclick="enterApp()">РІРѕР№С‚Рё в†’</button>
+</div>
+ 
+<div id="app">
+  <nav>
+    <div class="logo">wunmental</div>
+    <button class="menu-btn" onclick="toggleMenu()" aria-label="РћС‚РєСЂС‹С‚СЊ РјРµРЅСЋ"><span></span><span></span><span></span></button>
+  </nav>
+  <div class="menu-drawer" id="menuDrawer">
+    <button class="drawer-link on" data-page="home" onclick="pg('home')">Р“Р»Р°РІРЅР°СЏ</button>
+    <button class="drawer-link" data-page="tests" onclick="pg('tests')">РўРµСЃС‚С‹</button>
+    <button class="drawer-link" data-page="myths" onclick="pg('myths')">РњРёС„С‹</button>
+    <button class="drawer-link" data-page="wins" onclick="pg('wins')">РњРёРЅРё-Р·Р°РґР°С‡Рё</button>
+  </div>
+  <aside class="left-rail">
+    <button class="rail-item on" data-rail="profile" onclick="sidebarJump('profile')"><span class="rail-icon">рџ‘¤</span><span>РџСЂРѕС„РёР»СЊ</span></button>
+    <button class="rail-item" data-rail="community" onclick="sidebarJump('community')"><span class="rail-icon">рџЏ </span><span>РЎРѕРѕР±С‰РµСЃС‚РІРѕ</span></button>
+    <button class="rail-item" data-rail="chats" onclick="sidebarJump('chats')"><span class="rail-icon">рџ’¬</span><span>Р§Р°С‚С‹</span></button>
+    <button class="rail-item" data-rail="post" onclick="sidebarJump('post')"><span class="rail-icon">пј‹</span><span>РџРѕСЃС‚</span></button>
+  </aside>
+ 
+  <div id="page-home" class="page on">
+    <div class="home-hero">
+      <div class="hero-bg"></div>
+      <div class="mood-badge" id="moodBadge">рџ‘‹ РџСЂРёРІРµС‚!</div>
+      <h1 class="hero-title">Р’Р°С€Рµ Р·РґРѕСЂРѕРІСЊРµ вЂ”<br><span>РЅР°С€ РіР»Р°РІРЅС‹Р№ РїСЂРёРѕСЂРёС‚РµС‚</span></h1>
+      <p class="hero-sub">РџСЂРѕР№РґРё РЅР°СѓС‡РЅРѕ РѕР±РѕСЃРЅРѕРІР°РЅРЅС‹Рµ С‚РµСЃС‚С‹, РѕС‚СЃР»РµР¶РёРІР°Р№ РґРёРЅР°РјРёРєСѓ СЃРѕСЃС‚РѕСЏРЅРёСЏ Рё РїРѕР»СѓС‡Рё РєРѕРЅРєСЂРµС‚РЅСѓСЋ РїРѕРјРѕС‰СЊ.</p>
+      <div class="cta-row">
+        <button class="btn btn-o" onclick="pg('tests')">РїСЂРѕР№С‚Рё С‚РµСЃС‚</button>
+        <button class="btn btn-g" onclick="pg('community')">РїРѕСЃРјРѕС‚СЂРµС‚СЊ СЃРѕРѕР±С‰РµСЃС‚РІРѕ</button>
+      </div>
+    </div>
+    <div class="tracker-wrap">
+      <div class="tracker-card">
+        <div class="tracker-title"><span></span> Р”РЅРµРІРЅРёРє РЅР°СЃС‚СЂРѕРµРЅРёСЏ вЂ” РїРѕСЃР»РµРґРЅРёРµ 7 РґРЅРµР№</div>
+        <div class="tracker-graph">
+          <svg class="graph-line" id="moodGraph" viewBox="0 0 300 80" preserveAspectRatio="none">
+            <defs><linearGradient id="grd" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ff6b35" stop-opacity=".3"/><stop offset="100%" stop-color="#ff6b35" stop-opacity="0"/></linearGradient></defs>
+          </svg>
+        </div>
+        <div class="tracker-days" id="trackerDays"></div>
+      </div>
+    </div>
+    <div class="feature-wrap">
+      <div class="feature-grid">
+        <div class="feature-card">
+          <div class="feature-kicker">РќРѕРІРѕРµ</div>
+          <div class="feature-title">РђРЅРѕРЅРёРјРЅС‹Рµ РёСЃС‚РѕСЂРёРё</div>
+          <div class="feature-text">РњРѕР¶РЅРѕ РІС‹РіРѕРІРѕСЂРёС‚СЊСЃСЏ Р±РµР· РёРјРµРЅРё Рё РїРѕР»СѓС‡РёС‚СЊ СЌРјРѕРґР·Рё-СЂРµР°РєС†РёРё РїРѕРґРґРµСЂР¶РєРё РѕС‚ РґСЂСѓРіРёС….</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-kicker">РќРѕРІС‹Р№ РјРѕРґСѓР»СЊ</div>
+          <div class="feature-title">РђРєРєР°СѓРЅС‚С‹ Рё РґРѕСЃС‚СѓРї</div>
+          <div class="feature-text">РџСѓР±Р»РёРєР°С†РёРё Рё С‡Р°С‚С‹ РїРµСЂРµС…РѕРґСЏС‚ РЅР° РјРѕРґРµР»СЊ РІС…РѕРґР° РїРѕ Р»РѕРіРёРЅСѓ Рё РїР°СЂРѕР»СЋ. РџРѕР»РЅРѕС†РµРЅРЅС‹Р№ Р°РєРєР°СѓРЅС‚ СЃРєРѕСЂРѕ.</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-kicker">РЎРѕРѕР±С‰РµСЃС‚РІРѕ</div>
+          <div class="feature-title">РџРѕСЃС‚С‹ Рё РѕР±СЃСѓР¶РґРµРЅРёСЏ</div>
+          <div class="feature-text">РЎР»РµРІР° С‚РµРїРµСЂСЊ РµСЃС‚СЊ Р±С‹СЃС‚СЂС‹Р№ РґРѕСЃС‚СѓРї Рє РїСЂРѕС„РёР»СЋ, СЃРѕРѕР±С‰РµСЃС‚РІСѓ, С‡Р°С‚Р°Рј Рё СЃРѕР·РґР°РЅРёСЋ РЅРѕРІРѕРіРѕ РїРѕСЃС‚Р°.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+ 
+  <div id="page-tests" class="page">
+    <div class="ph"><div class="pt">РўРµСЃС‚С‹ рџ§ </div><div class="ps">РќР°СѓС‡РЅРѕ РѕР±РѕСЃРЅРѕРІР°РЅРЅС‹Рµ РёРЅСЃС‚СЂСѓРјРµРЅС‚С‹ СЃР°РјРѕРґРёР°РіРЅРѕСЃС‚РёРєРё. Р РµР·СѓР»СЊС‚Р°С‚ вЂ” РЅРµ РґРёР°РіРЅРѕР·, Р° РѕСЂРёРµРЅС‚РёСЂ.</div></div>
+    <div id="tests-grid" class="tests-grid">
+      <div class="test-card" onclick="startTest('beck')"><div class="test-badge badge-sci">РќР°СѓС‡РЅС‹Р№ В· РЁРєР°Р»Р° Р‘РµРєР°</div><div class="test-icon">рџ§©</div><div class="test-name">РЈСЂРѕРІРµРЅСЊ РґРµРїСЂРµСЃСЃРёРё (BDI)</div><div class="test-desc">РћРїСЂРѕСЃРЅРёРє Р‘РµРєР° вЂ” РјРёСЂРѕРІРѕР№ СЃС‚Р°РЅРґР°СЂС‚ СЃР°РјРѕРґРёР°РіРЅРѕСЃС‚РёРєРё РґРµРїСЂРµСЃСЃРёРё СЃ 1961 РіРѕРґР°.</div><div class="test-meta">вЏ± 5 РјРёРЅСѓС‚ В· 21 РІРѕРїСЂРѕСЃ</div></div>
+      <div class="test-card" onclick="startTest('spielberger')"><div class="test-badge badge-sci">РќР°СѓС‡РЅС‹Р№ В· РЎРїРёР»Р±РµСЂРіРµСЂ-РҐР°РЅРёРЅ</div><div class="test-icon">вљЎ</div><div class="test-name">РўСЂРµРІРѕР¶РЅРѕСЃС‚СЊ (STAI)</div><div class="test-desc">Р Р°Р·РґРµР»СЏРµС‚ СЃРёС‚СѓР°С‚РёРІРЅСѓСЋ С‚СЂРµРІРѕРіСѓ (СЃРµР№С‡Р°СЃ) Рё Р»РёС‡РЅРѕСЃС‚РЅСѓСЋ (РІСЃРµРіРґР°).</div><div class="test-meta">вЏ± 4 РјРёРЅСѓС‚С‹ В· 15 РІРѕРїСЂРѕСЃРѕРІ</div></div>
+      <div class="test-card" onclick="startTest('chen')"><div class="test-badge badge-sci">РќР°СѓС‡РЅС‹Р№ В· РЁРєР°Р»Р° Р§РµРЅР°</div><div class="test-icon">рџ“±</div><div class="test-name">РРЅС‚РµСЂРЅРµС‚-Р·Р°РІРёСЃРёРјРѕСЃС‚СЊ (CIAS)</div><div class="test-desc">РЁРєР°Р»Р° РёРЅС‚РµСЂРЅРµС‚-Р·Р°РІРёСЃРёРјРѕСЃС‚Рё Р§РµРЅР° вЂ” РїСЂРёР·РЅР°РЅРЅС‹Р№ РёРЅСЃС‚СЂСѓРјРµРЅС‚ РґРёР°РіРЅРѕСЃС‚РёРєРё.</div><div class="test-meta">вЏ± 4 РјРёРЅСѓС‚С‹ В· 15 РІРѕРїСЂРѕСЃРѕРІ</div></div>
+      <div class="test-card" onclick="startTest('phq9')"><div class="test-badge badge-sci">РќР°СѓС‡РЅС‹Р№ В· PHQ-9</div><div class="test-icon">рџ©є</div><div class="test-name">РЎРєСЂРёРЅРёРЅРі РґРµРїСЂРµСЃСЃРёРё (PHQ-9)</div><div class="test-desc">РљСЂР°С‚РєР°СЏ РјРµР¶РґСѓРЅР°СЂРѕРґРЅР°СЏ С€РєР°Р»Р° РґР»СЏ РїРµСЂРІРёС‡РЅРѕР№ РѕС†РµРЅРєРё РґРµРїСЂРµСЃСЃРёРІРЅРѕР№ СЃРёРјРїС‚РѕРјР°С‚РёРєРё.</div><div class="test-meta">вЏ± 2 РјРёРЅСѓС‚С‹ В· 9 РІРѕРїСЂРѕСЃРѕРІ</div></div>
+      <div class="test-card" onclick="startTest('gad7')"><div class="test-badge badge-sci">РќР°СѓС‡РЅС‹Р№ В· GAD-7</div><div class="test-icon">рџ“Љ</div><div class="test-name">РЎРєСЂРёРЅРёРЅРі С‚СЂРµРІРѕРіРё (GAD-7)</div><div class="test-desc">РћС†РµРЅРёРІР°РµС‚ РІС‹СЂР°Р¶РµРЅРЅРѕСЃС‚СЊ РіРµРЅРµСЂР°Р»РёР·РѕРІР°РЅРЅРѕР№ С‚СЂРµРІРѕРіРё РїРѕ СЃС‚Р°РЅРґР°СЂС‚РЅРѕРјСѓ РїСЂРѕС‚РѕРєРѕР»Сѓ.</div><div class="test-meta">вЏ± 2 РјРёРЅСѓС‚С‹ В· 7 РІРѕРїСЂРѕСЃРѕРІ</div></div>
+      <div class="test-card" onclick="startTest('rses')"><div class="test-badge badge-sci">РќР°СѓС‡РЅС‹Р№ В· RSES</div><div class="test-icon">рџЄћ</div><div class="test-name">РЎР°РјРѕРѕС†РµРЅРєР° Р РѕР·РµРЅР±РµСЂРіР°</div><div class="test-desc">РљР»Р°СЃСЃРёС‡РµСЃРєРёР№ РѕРїСЂРѕСЃРЅРёРє РіР»РѕР±Р°Р»СЊРЅРѕР№ СЃР°РјРѕРѕС†РµРЅРєРё РёР· 10 СѓС‚РІРµСЂР¶РґРµРЅРёР№.</div><div class="test-meta">вЏ± 3 РјРёРЅСѓС‚С‹ В· 10 РІРѕРїСЂРѕСЃРѕРІ</div></div>
+      <div class="test-card" onclick="startTest('ucla')"><div class="test-badge badge-sci">РќР°СѓС‡РЅС‹Р№ В· UCLA</div><div class="test-icon">рџ§­</div><div class="test-name">РЁРєР°Р»Р° РѕРґРёРЅРѕС‡РµСЃС‚РІР° UCLA</div><div class="test-desc">РћС†РµРЅРёРІР°РµС‚ СЃСѓР±СЉРµРєС‚РёРІРЅРѕРµ РѕС‰СѓС‰РµРЅРёРµ РѕРґРёРЅРѕС‡РµСЃС‚РІР° РІ РїРѕРІСЃРµРґРЅРµРІРЅРѕР№ Р¶РёР·РЅРё.</div><div class="test-meta">вЏ± 4 РјРёРЅСѓС‚С‹ В· 20 РІРѕРїСЂРѕСЃРѕРІ</div></div>
+      <div class="test-card" onclick="startTest('mps')"><div class="test-badge badge-sci">РќР°СѓС‡РЅС‹Р№ В· MPS</div><div class="test-icon">рџЋ“</div><div class="test-name">РџРµСЂС„РµРєС†РёРѕРЅРёР·Рј Р¤СЂРѕСЃС‚Р°</div><div class="test-desc">РџРѕРєР°Р·С‹РІР°РµС‚, РєР°Рє РґР°РІР»РµРЅРёРµ СЃС‚Р°РЅРґР°СЂС‚РѕРІ Рё СЃР°РјРѕРєСЂРёС‚РёРєР° РІР»РёСЏСЋС‚ РЅР° С‚РµР±СЏ.</div><div class="test-meta">вЏ± 7 РјРёРЅСѓС‚ В· 35 РІРѕРїСЂРѕСЃРѕРІ</div></div>
+      <div class="test-card" onclick="startTest('lay')"><div class="test-badge badge-sci">РќР°СѓС‡РЅС‹Р№ В· Lay</div><div class="test-icon">вЏі</div><div class="test-name">РџСЂРѕРєСЂР°СЃС‚РёРЅР°С†РёСЏ Р›СЌСЏ</div><div class="test-desc">РџРѕРєР°Р·С‹РІР°РµС‚ СЃРєР»РѕРЅРЅРѕСЃС‚СЊ РѕС‚РєР»Р°РґС‹РІР°С‚СЊ РґРµР»Р° Рё РІС‹РїР°РґР°С‚СЊ РёР· СЂРёС‚РјР°.</div><div class="test-meta">вЏ± 4 РјРёРЅСѓС‚С‹ В· 20 РІРѕРїСЂРѕСЃРѕРІ</div></div>
+      <div class="test-card" onclick="startTest('tas20')"><div class="test-badge badge-sci">РќР°СѓС‡РЅС‹Р№ В· TAS-20</div><div class="test-icon">рџ§ </div><div class="test-name">РђР»РµРєСЃРёС‚РёРјРёСЏ (TAS-20)</div><div class="test-desc">РћС†РµРЅРєР° С‚СЂСѓРґРЅРѕСЃС‚РµР№ РІ СЂР°СЃРїРѕР·РЅР°РІР°РЅРёРё Рё РѕРїРёСЃР°РЅРёРё СЃРІРѕРёС… СЌРјРѕС†РёР№.</div><div class="test-meta">вЏ± 4 РјРёРЅСѓС‚С‹ В· 20 РІРѕРїСЂРѕСЃРѕРІ</div></div>
+      <div class="test-card" onclick="startTest('maddi')"><div class="test-badge badge-sci">РќР°СѓС‡РЅС‹Р№ В· Hardiness</div><div class="test-icon">рџ›ЎпёЏ</div><div class="test-name">Р–РёР·РЅРµСЃС‚РѕР№РєРѕСЃС‚СЊ РњР°РґРґРё</div><div class="test-desc">Р’РѕРІР»РµС‡РµРЅРЅРѕСЃС‚СЊ, РєРѕРЅС‚СЂРѕР»СЊ Рё РіРѕС‚РѕРІРЅРѕСЃС‚СЊ Рє РІС‹Р·РѕРІР°Рј РІ СЃС‚СЂРµСЃСЃРѕРІРѕР№ СЃРёС‚СѓР°С†РёРё.</div><div class="test-meta">вЏ± 4 РјРёРЅСѓС‚С‹ В· 18 РІРѕРїСЂРѕСЃРѕРІ</div></div>
+      <div class="test-card" onclick="startTest('lazarus')"><div class="test-badge badge-sci">РќР°СѓС‡РЅС‹Р№ В· Coping</div><div class="test-icon">рџ§Ї</div><div class="test-name">РљРѕРїРёРЅРі-СЃС‚СЂР°С‚РµРіРёРё Р›Р°Р·Р°СЂСѓСЃР°</div><div class="test-desc">РџРѕРєР°Р·С‹РІР°РµС‚, РєР°РєРёРµ СЃРїРѕСЃРѕР±С‹ СЃРїСЂР°РІР»СЏС‚СЊСЃСЏ СЃРѕ СЃС‚СЂРµСЃСЃРѕРј С‚С‹ РёСЃРїРѕР»СЊР·СѓРµС€СЊ С‡Р°С‰Рµ.</div><div class="test-meta">вЏ± 5 РјРёРЅСѓС‚ В· 24 РІРѕРїСЂРѕСЃР°</div></div>
+      <div class="test-card" onclick="startTest('msceit')"><div class="test-badge badge-sci">РђРґР°РїС‚Р°С†РёСЏ В· EQ</div><div class="test-icon">рџЊЄ</div><div class="test-name">MSCEIT (Р°РґР°РїС‚.)</div><div class="test-desc">РЎРєСЂРёРЅРёРЅРі РЅР°РІС‹РєРѕРІ СЂР°СЃРїРѕР·РЅР°РІР°РЅРёСЏ Рё СЂРµРіСѓР»СЏС†РёРё СЌРјРѕС†РёР№ РІ СЃРѕС†РёР°Р»СЊРЅС‹С… СЃРёС‚СѓР°С†РёСЏС…. </div><div class="test-meta">вЏ± 3 РјРёРЅСѓС‚С‹ В· 16 РІРѕРїСЂРѕСЃРѕРІ</div></div>
+    </div>
+    <div id="quiz-wrap" class="quiz-wrap">
+      <button class="back-btn" onclick="backToTests()">в†ђ РЅР°Р·Р°Рґ Рє С‚РµСЃС‚Р°Рј</button>
+      <div class="quiz-card">
+        <div class="qprog" id="qProg"></div>
+        <div id="qContent"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="page-community" class="page">
+    <div class="ph"><div class="pt">РЎРѕРѕР±С‰РµСЃС‚РІРѕ</div><div class="ps">РђРЅРѕРЅРёРјРЅС‹Рµ РёСЃС‚РѕСЂРёРё, РіСЂСѓРїРїС‹ РїРѕ РѕРїС‹С‚Сѓ, Р·Р°РїСЂРѕСЃС‹ РЅР° РїРѕРґРґРµСЂР¶РєСѓ Рё РЅРµРґРµР»СЊРЅС‹Р№ РґР°Р№РґР¶РµСЃС‚.</div></div>
+    <div class="feature-wrap">
+      <div class="feature-grid" style="margin-bottom:1rem;">
+        <div class="feature-card" id="community-profile">
+          <div class="feature-kicker">РџСЂРѕС„РёР»СЊ</div>
+          <div class="feature-title">РўРІРѕР№ СѓРіРѕР»РѕРє</div>
+          <div class="feature-text">РџРѕРєР° Р±РµР· СЂРµРіРёСЃС‚СЂР°С†РёРё: РЅР°СЃС‚СЂРѕРµРЅРёРµ, Р·Р°РїРёСЃРё Рё Р°РєС‚РёРІРЅРѕСЃС‚СЊ РѕСЃС‚Р°СЋС‚СЃСЏ Р»РѕРєР°Р»СЊРЅРѕ РЅР° СѓСЃС‚СЂРѕР№СЃС‚РІРµ.</div>
+        </div>
+        <div class="feature-card" id="community-chats">
+          <div class="feature-kicker">Р§Р°С‚С‹</div>
+          <div class="feature-title">РљРѕРјРЅР°С‚С‹ РїРѕ С‚РµРјР°Рј</div>
+          <div>
+            <span class="group-pill">РїРѕРґРґРµСЂР¶РєР° РІРµС‡РµСЂРѕРј</span>
+            <span class="group-pill">Р°РЅС‚РёСЃС‚СЂРµСЃСЃ РїРµСЂРµРґ СѓС‡С‘Р±РѕР№</span>
+            <span class="group-pill">СЂР°Р·РіРѕРІРѕСЂ Р±РµР· РѕСЃСѓР¶РґРµРЅРёСЏ</span>
+          </div>
+        </div>
+      </div>
+      <div class="feature-card" style="margin-bottom:1rem;" id="community-feed">
+        <div class="feature-kicker">Р“СЂСѓРїРїС‹ РїРѕ РёРЅС‚РµСЂРµСЃР°Рј</div>
+        <div class="feature-title">РќР°Р№РґРё Р»СЋРґРµР№ СЃ РїРѕС…РѕР¶РёРј РѕРїС‹С‚РѕРј</div>
+        <div>
+          <span class="group-pill">СЏ С‚РѕР¶Рµ РёРЅС‚СЂРѕРІРµСЂС‚</span>
+          <span class="group-pill">СЏ С‚РѕР¶Рµ РёР· СЂР°Р·РІРµРґС‘РЅРЅРѕР№ СЃРµРјСЊРё</span>
+          <span class="group-pill">РґР°РІР»РµРЅРёРµ РѕС†РµРЅРѕРє</span>
+          <span class="group-pill">С‚СЂРµРІРѕРіР° РїРµСЂРµРґ СЌРєР·Р°РјРµРЅР°РјРё</span>
+          <span class="group-pill">РЅРµ РјРѕРіСѓ СѓСЃРЅСѓС‚СЊ</span>
+          <span class="group-pill">С‡СѓРІСЃС‚РІСѓСЋ РѕРґРёРЅРѕС‡РµСЃС‚РІРѕ</span>
+        </div>
+      </div>
+      <div class="feature-grid" style="margin-bottom:1rem;">
+        <div class="feature-card story-form" id="community-post">
+          <div class="feature-kicker">РђРЅРѕРЅРёРјРЅРѕ</div>
+          <div class="feature-title">РќР°РїРёСЃР°С‚СЊ РёСЃС‚РѕСЂРёСЋ (СЃ РІС…РѕРґРѕРј)</div>
+          <textarea id="storyInput" placeholder="РќР°РїСЂРёРјРµСЂ: СЃРµРіРѕРґРЅСЏ РІ С€РєРѕР»Рµ Р±С‹Р»Рѕ С‚СЏР¶РµР»Рѕ, Рё СЏ С…РѕС‡Сѓ СЌС‚Рѕ РїСЂРѕСЃС‚Рѕ РІС‹РїРёСЃР°С‚СЊ..."></textarea>
+          <div class="inline-actions">
+            <button class="btn btn-o" onclick="submitStory()">Р’РѕР№С‚Рё Рё РѕРїСѓР±Р»РёРєРѕРІР°С‚СЊ</button>
+            <button class="btn btn-g" onclick="prefillStory()">РќСѓР¶РЅР° РёРґРµСЏ</button>
+          </div>
+          <div class="auth-note">РџСѓР±Р»РёРєР°С†РёСЏ РґРѕСЃС‚СѓРїРЅР° РїРѕСЃР»Рµ Р°РІС‚РѕСЂРёР·Р°С†РёРё. Р­РєСЂР°РЅ РІС…РѕРґР° СѓР¶Рµ РµСЃС‚СЊ, Р·Р°РїСѓСЃРє СЃРєРѕСЂРѕ.</div>
+        </div>
+        <div class="feature-card support-form">
+          <div class="feature-kicker">РџРѕРґРґРµСЂР¶РєР°</div>
+          <div class="feature-title">РЎРёРіРЅР°Р» В«РјРЅРµ РїР»РѕС…РѕВ»</div>
+          <textarea id="supportInput" placeholder="РљРѕСЂРѕС‚РєРѕ РѕРїРёС€Рё, С‡С‚Рѕ РїСЂРѕРёСЃС…РѕРґРёС‚. Р­С‚Рѕ СЃРѕС…СЂР°РЅРёС‚СЃСЏ РІ Р»РѕРєР°Р»СЊРЅРѕР№ СЃС‚РµРЅРµ РїРѕРґРґРµСЂР¶РєРё СЃР°Р№С‚Р°."></textarea>
+          <div class="inline-actions">
+            <button class="btn btn-o" onclick="submitSupport()">Р’РѕР№С‚Рё Рё РѕС‚РїСЂР°РІРёС‚СЊ</button>
+            <button class="btn btn-g" onclick="pg('help')">РЎСЂРѕС‡РЅР°СЏ РїРѕРјРѕС‰СЊ</button>
+          </div>
+        </div>
+      </div>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <div class="feature-kicker">Р›РµРЅС‚Р°</div>
+          <div class="feature-title">РђРЅРѕРЅРёРјРЅС‹Рµ РёСЃС‚РѕСЂРёРё</div>
+          <div id="storyList" class="story-list"></div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-kicker">РћС‚РІРµС‚С‹ СЃРѕРѕР±С‰РµСЃС‚РІР°</div>
+          <div class="feature-title">РљРѕРјСѓ РЅСѓР¶РЅР° РїРѕРґРґРµСЂР¶РєР°</div>
+          <div id="supportList" class="support-list"></div>
+        </div>
+      </div>
+      <div class="feature-card" style="margin-top:1rem;">
+        <div class="feature-kicker">Р”Р°Р№РґР¶РµСЃС‚</div>
+        <div class="feature-title">Р§С‚Рѕ РїСЂРѕРёСЃС…РѕРґРёР»Рѕ РЅР° СЃР°Р№С‚Рµ Р·Р° РЅРµРґРµР»СЋ</div>
+        <div id="digestGrid" class="feature-grid"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="page-myths" class="page">
+    <div class="ph"><div class="pt">РњРёС„С‹ Рё С„Р°РєС‚С‹ рџ’Ў</div><div class="ps">РќР°Р¶РјРё РЅР° РєР°СЂС‚РѕС‡РєСѓ С‡С‚РѕР±С‹ СѓР·РЅР°С‚СЊ РїСЂР°РІРґСѓ</div></div>
+    <div class="myths-grid">
+      <div class="myth-card" onclick="this.classList.toggle('flipped')"><div class="myth-front"><div class="myth-tag m">РњРР¤</div><div class="myth-text">В«РћР±СЂР°С‚РёС‚СЊСЃСЏ Рє РїСЃРёС…РѕР»РѕРіСѓ вЂ” Р·РЅР°С‡РёС‚ С‚С‹ РїСЃРёС… РёР»Рё СЃР»Р°Р±Р°РєВ»</div><div class="myth-hint">рџ‘† РЅР°Р¶РјРё С‡С‚РѕР±С‹ СѓР·РЅР°С‚СЊ РїСЂР°РІРґСѓ</div></div><div class="myth-back"><div class="myth-tag f">Р¤РђРљРў</div><div class="myth-text">Рљ РїСЃРёС…РѕР»РѕРіСѓ С…РѕРґСЏС‚ Р»СЋРґРё РєРѕС‚РѕСЂС‹Рµ С…РѕС‚СЏС‚ СЂР°Р·РѕР±СЂР°С‚СЊСЃСЏ РІ СЃРµР±Рµ вЂ” СЌС‚Рѕ РїСЂРёР·РЅР°Рє СЃРёР»С‹. РЎРїРѕСЂС‚СЃРјРµРЅС‹, СЂСѓРєРѕРІРѕРґРёС‚РµР»Рё, СѓС‡С‘РЅС‹Рµ СЂР°Р±РѕС‚Р°СЋС‚ СЃ РїСЃРёС…РѕР»РѕРіР°РјРё СЂРµРіСѓР»СЏСЂРЅРѕ.</div></div></div>
+      <div class="myth-card" onclick="this.classList.toggle('flipped')"><div class="myth-front"><div class="myth-tag m">РњРР¤</div><div class="myth-text">В«РџСЃРёС…РѕР»РѕРі СЃРѕРѕР±С‰РёС‚ РІ С€РєРѕР»Сѓ РёР»Рё СЂРѕРґРёС‚РµР»СЏРјВ»</div><div class="myth-hint">рџ‘† РЅР°Р¶РјРё С‡С‚РѕР±С‹ СѓР·РЅР°С‚СЊ РїСЂР°РІРґСѓ</div></div><div class="myth-back"><div class="myth-tag f">Р¤РђРљРў</div><div class="myth-text">Р Р°Р±РѕС‚Р° СЃ РїСЃРёС…РѕР»РѕРіРѕРј РєРѕРЅС„РёРґРµРЅС†РёР°Р»СЊРЅР°. Р‘РµР· С‚РІРѕРµРіРѕ СЃРѕРіР»Р°СЃРёСЏ РѕРЅ РЅРµ РјРѕР¶РµС‚ СЃРѕРѕР±С‰Р°С‚СЊ С‡С‚Рѕ-Р»РёР±Рѕ вЂ” СЌС‚Рѕ Р·Р°РєСЂРµРїР»РµРЅРѕ РІ РїСЂРѕС„РµСЃСЃРёРѕРЅР°Р»СЊРЅРѕРј РєРѕРґРµРєСЃРµ.</div></div></div>
+      <div class="myth-card" onclick="this.classList.toggle('flipped')"><div class="myth-front"><div class="myth-tag m">РњРР¤</div><div class="myth-text">В«Р”РµРїСЂРµСЃСЃРёСЏ вЂ” СЌС‚Рѕ РїСЂРѕСЃС‚Рѕ Р»РµРЅСЊ Рё РЅРµР¶РµР»Р°РЅРёРµ С€РµРІРµР»РёС‚СЊСЃСЏВ»</div><div class="myth-hint">рџ‘† РЅР°Р¶РјРё С‡С‚РѕР±С‹ СѓР·РЅР°С‚СЊ РїСЂР°РІРґСѓ</div></div><div class="myth-back"><div class="myth-tag f">Р¤РђРљРў</div><div class="myth-text">Р”РµРїСЂРµСЃСЃРёСЏ вЂ” Р·Р°Р±РѕР»РµРІР°РЅРёРµ СЃ Р±РёРѕР»РѕРіРёС‡РµСЃРєРѕР№ РѕСЃРЅРѕРІРѕР№. РџСЂРё РЅРµР№ РЅР°СЂСѓС€Р°РµС‚СЃСЏ РІС‹СЂР°Р±РѕС‚РєР° СЃРµСЂРѕС‚РѕРЅРёРЅР° Рё РґРѕС„Р°РјРёРЅР°. В«РџСЂРѕСЃС‚Рѕ РІСЃС‚Р°РЅСЊВ» вЂ” РІСЃС‘ СЂР°РІРЅРѕ С‡С‚Рѕ В«РїСЂРѕСЃС‚Рѕ РЅРµ Р±РѕР»РµР№В».</div></div></div>
+      <div class="myth-card" onclick="this.classList.toggle('flipped')"><div class="myth-front"><div class="myth-tag m">РњРР¤</div><div class="myth-text">В«РўСЂРµРІРѕРіР° СЃР°РјРѕ РїСЂРѕР№РґС‘С‚, РЅРµС‡РµРіРѕ РЅРµСЂРІРЅРёС‡Р°С‚СЊВ»</div><div class="myth-hint">рџ‘† РЅР°Р¶РјРё С‡С‚РѕР±С‹ СѓР·РЅР°С‚СЊ РїСЂР°РІРґСѓ</div></div><div class="myth-back"><div class="myth-tag f">Р¤РђРљРў</div><div class="myth-text">РҐСЂРѕРЅРёС‡РµСЃРєР°СЏ С‚СЂРµРІРѕРіР° РЅРµ РїСЂРѕС…РѕРґРёС‚ СЃР°РјР° вЂ” РѕРЅР° РЅР°РєР°РїР»РёРІР°РµС‚СЃСЏ. Р’РћР— РїСЂРёР·РЅР°С‘С‚ С‚СЂРµРІРѕР¶РЅС‹Рµ СЂР°СЃСЃС‚СЂРѕР№СЃС‚РІР° РѕРґРЅРёРјРё РёР· СЃР°РјС‹С… СЂР°СЃРїСЂРѕСЃС‚СЂР°РЅС‘РЅРЅС‹С… Р±РѕР»РµР·РЅРµР№ РІ РјРёСЂРµ.</div></div></div>
+      <div class="myth-card" onclick="this.classList.toggle('flipped')"><div class="myth-front"><div class="myth-tag m">РњРР¤</div><div class="myth-text">В«Р‘СѓР»Р»РёРЅРі вЂ” РЅРѕСЂРјР°Р»СЊРЅР°СЏ С‡Р°СЃС‚СЊ С€РєРѕР»СЊРЅРѕР№ Р¶РёР·РЅРёВ»</div><div class="myth-hint">рџ‘† РЅР°Р¶РјРё С‡С‚РѕР±С‹ СѓР·РЅР°С‚СЊ РїСЂР°РІРґСѓ</div></div><div class="myth-back"><div class="myth-tag f">Р¤РђРљРў</div><div class="myth-text">Р‘СѓР»Р»РёРЅРі РѕСЃС‚Р°РІР»СЏРµС‚ РїРѕСЃР»РµРґСЃС‚РІРёСЏ РЅР° РіРѕРґС‹. Р–РµСЂС‚РІС‹ РІ 3 СЂР°Р·Р° С‡Р°С‰Рµ СЃС‚СЂР°РґР°СЋС‚ РґРµРїСЂРµСЃСЃРёРµР№ РІРѕ РІР·СЂРѕСЃР»РѕРј РІРѕР·СЂР°СЃС‚Рµ. Р­С‚Рѕ РЅРµ РЅРѕСЂРјР°.</div></div></div>
+      <div class="myth-card" onclick="this.classList.toggle('flipped')"><div class="myth-front"><div class="myth-tag m">РњРР¤</div><div class="myth-text">В«РњРЅРѕРіРѕ СЃРёРґРёС€СЊ РІ С‚РµР»РµС„РѕРЅРµ вЂ” РїСЂРѕСЃС‚Рѕ РЅРµС‚ СЃРёР»С‹ РІРѕР»РёВ»</div><div class="myth-hint">рџ‘† РЅР°Р¶РјРё С‡С‚РѕР±С‹ СѓР·РЅР°С‚СЊ РїСЂР°РІРґСѓ</div></div><div class="myth-back"><div class="myth-tag f">Р¤РђРљРў</div><div class="myth-text">РЎРѕС†СЃРµС‚Рё СЃРїСЂРѕРµРєС‚РёСЂРѕРІР°РЅС‹ РЅРµР№СЂРѕР±РёРѕР»РѕРіР°РјРё СЃРїРµС†РёР°Р»СЊРЅРѕ С‡С‚РѕР±С‹ СЃРѕР·РґР°РІР°С‚СЊ Р·Р°РІРёСЃРёРјРѕСЃС‚СЊ. Р­С‚Рѕ РЅРµ СЃР»Р°Р±РѕСЃС‚СЊ вЂ” СЌС‚Рѕ Р±РѕСЂСЊР±Р° СЃ РїСЂРѕС„РµСЃСЃРёРѕРЅР°Р»СЊРЅРѕ СЃРѕР·РґР°РЅРЅРѕР№ Р»РѕРІСѓС€РєРѕР№.</div></div></div>
+      <div class="myth-card" onclick="this.classList.toggle('flipped')"><div class="myth-front"><div class="myth-tag m">РњРР¤</div><div class="myth-text">В«РџР»РѕС…РѕР№ СЃРѕРЅ вЂ” Р»РµРЅСЊ, РјРѕР¶РЅРѕ Рё 5 С‡Р°СЃРѕРІВ»</div><div class="myth-hint">рџ‘† РЅР°Р¶РјРё С‡С‚РѕР±С‹ СѓР·РЅР°С‚СЊ РїСЂР°РІРґСѓ</div></div><div class="myth-back"><div class="myth-tag f">Р¤РђРљРў</div><div class="myth-text">РџСЂРё РЅРµРґРѕСЃС‹РїРµ СЃРЅРёР¶Р°РµС‚СЃСЏ IQ, РёРјРјСѓРЅРёС‚РµС‚ Рё РєРѕРЅС‚СЂРѕР»СЊ СЌРјРѕС†РёР№. РҐСЂРѕРЅРёС‡РµСЃРєРёР№ РЅРµРґРѕСЃС‹Рї Сѓ РїРѕРґСЂРѕСЃС‚РєРѕРІ СЃРІСЏР·Р°РЅ СЃ РґРµРїСЂРµСЃСЃРёРµР№ Рё РїР»РѕС…РѕР№ СѓСЃРїРµРІР°РµРјРѕСЃС‚СЊСЋ.</div></div></div>
+      <div class="myth-card" onclick="this.classList.toggle('flipped')"><div class="myth-front"><div class="myth-tag m">РњРР¤</div><div class="myth-text">В«Р•СЃР»Рё С‚РµР±Рµ РїР»РѕС…Рѕ вЂ” РїСЂРѕСЃС‚Рѕ РЅРµ РґСѓРјР°Р№ РѕР± СЌС‚РѕРјВ»</div><div class="myth-hint">рџ‘† РЅР°Р¶РјРё С‡С‚РѕР±С‹ СѓР·РЅР°С‚СЊ РїСЂР°РІРґСѓ</div></div><div class="myth-back"><div class="myth-tag f">Р¤РђРљРў</div><div class="myth-text">РџРѕРґР°РІР»РµРЅРёРµ СЌРјРѕС†РёР№ РЅРµ СѓР±РёСЂР°РµС‚ РёС… вЂ” РѕРЅРё РЅР°РєР°РїР»РёРІР°СЋС‚СЃСЏ. РџСЃРёС…РѕР»РѕРіРё РЅР°Р·С‹РІР°СЋС‚ СЌС‚Рѕ В«СЌРјРѕС†РёРѕРЅР°Р»СЊРЅС‹Рј РІС‹С‚РµСЃРЅРµРЅРёРµРјВ» вЂ” РѕРЅРѕ РїСЂРёРІРѕРґРёС‚ Рє РІР·СЂС‹РІР°Рј Рё РїСЃРёС…РѕСЃРѕРјР°С‚РёРєРµ.</div></div></div>
+    </div>
+  </div>
+ 
+  <div id="page-wins" class="page">
+    <div class="ph"><div class="pt">РњРёРЅРё-Р·Р°РґР°С‡Рё рџЋЇ</div><div class="ps">РљРѕРіРґР° СЃРёР» РЅРµС‚ РЅР° Р±РѕР»СЊС€РѕРµ вЂ” СЃРґРµР»Р°Р№ РјР°Р»РµРЅСЊРєРѕРµ. Р­С‚Рѕ СЂР°Р±РѕС‚Р°РµС‚.</div></div>
+    <div class="wins-wrap">
+      <div class="wins-card">
+        <div class="wins-task" id="winsTask">РќР°Р¶РјРё РєРЅРѕРїРєСѓ вЂ” РїРѕР»СѓС‡Рё Р·Р°РґР°РЅРёРµ</div>
+        <div class="wins-sub" id="winsSub">РљР°Р¶РґРѕРµ РјР°Р»РµРЅСЊРєРѕРµ РґРµР№СЃС‚РІРёРµ РјРµРЅСЏРµС‚ СЃРѕСЃС‚РѕСЏРЅРёРµ</div>
+        <button class="btn btn-o" onclick="getWin()">РґР°Р№ Р·Р°РґР°РЅРёРµ</button>
+        <div class="wins-done" id="winsDone" style="display:none;">
+          <button class="btn btn-g" onclick="doneWin()">вњ“ РІС‹РїРѕР»РЅРёР»</button>
+          <button class="btn btn-g" onclick="getWin()">РґСЂСѓРіРѕРµ</button>
+        </div>
+      </div>
+      <div id="winsAch" style="display:none;text-align:center;">
+        <div class="ach-badge">рџЏ… +1 РјР°Р»РµРЅСЊРєР°СЏ РїРѕР±РµРґР°</div>
+        <p style="color:var(--muted);font-size:.85rem;margin-top:.6rem;">РЎРµСЂСЊС‘Р·РЅРѕ, СЌС‚Рѕ РІР°Р¶РЅРѕ. РљР°Р¶РґРѕРµ РґРµР№СЃС‚РІРёРµ вЂ” С€Р°Рі.</p>
+      </div>
+    </div>
+  </div>
+ 
+  <div id="page-help" class="page">
+    <div class="ph"><div class="pt">РќСѓР¶РЅР° РїРѕРјРѕС‰СЊ? рџ“ћ</div><div class="ps">Р РµР°Р»СЊРЅС‹Рµ РЅРѕРјРµСЂР°. Р‘РµСЃРїР»Р°С‚РЅРѕ. РџСЂСЏРјРѕ СЃРµР№С‡Р°СЃ.</div></div>
+    <div class="sos-banner" style="margin:1rem 2rem 1.5rem;">
+      <div style="font-size:1.8rem;">рџ†</div>
+      <div class="sos-t"><h3>Р•СЃР»Рё С‚РµР±Рµ РѕС‡РµРЅСЊ РїР»РѕС…Рѕ РїСЂСЏРјРѕ СЃРµР№С‡Р°СЃ</h3><p>РџРѕР·РІРѕРЅРё вЂ” С‚Р°Рј Р¶РёРІС‹Рµ Р»СЋРґРё. Р­С‚Рѕ РЅРµ СЃС‚СЂР°С€РЅРѕ.</p></div>
+      <div class="sos-n">8-800-2000-122</div>
+    </div>
+    <div class="help-grid">
+      <div class="help-card"><div class="help-type">рџ‡·рџ‡є Р РѕСЃСЃРёСЏ В· Р‘РµСЃРїР»Р°С‚РЅРѕ</div><div class="help-name">РўРµР»РµС„РѕРЅ РґРѕРІРµСЂРёСЏ РґР»СЏ РґРµС‚РµР№</div><div class="help-desc">РџСЃРёС…РѕР»РѕРіРёС‡РµСЃРєР°СЏ РїРѕРјРѕС‰СЊ РґРµС‚СЏРј Рё РїРѕРґСЂРѕСЃС‚РєР°Рј РїРѕ РІСЃРµР№ Р РѕСЃСЃРёРё.</div><div class="help-phone">8-800-2000-122</div><div class="help-hrs">вЏ° РљСЂСѓРіР»РѕСЃСѓС‚РѕС‡РЅРѕ</div></div>
+      <div class="help-card"><div class="help-type">рџ‡·рџ‡є Р РѕСЃСЃРёСЏ В· Р‘РµСЃРїР»Р°С‚РЅРѕ</div><div class="help-name">Р­РєСЃС‚СЂРµРЅРЅР°СЏ РїСЃРёС…РѕР»РѕРіРёС‡РµСЃРєР°СЏ РїРѕРјРѕС‰СЊ</div><div class="help-desc">РџСЂРё РѕСЃС‚СЂРѕРј РєСЂРёР·РёСЃРµ. РђРЅРѕРЅРёРјРЅРѕСЃС‚СЊ РіР°СЂР°РЅС‚РёСЂРѕРІР°РЅР°.</div><div class="help-phone">8-800-100-49-94</div><div class="help-hrs">вЏ° РљСЂСѓРіР»РѕСЃСѓС‚РѕС‡РЅРѕ</div></div>
+      <div class="help-card"><div class="help-type">вљ пёЏ РљРёР±РµСЂР±СѓР»Р»РёРЅРі</div><div class="help-name">Р›РёРЅРёСЏ РїРѕРјРѕС‰Рё "Р”РµС‚Рё РѕРЅР»Р°Р№РЅ"</div><div class="help-desc">РџРѕРјРѕС‰СЊ РїСЂРё С‚СЂР°РІР»Рµ РІ РёРЅС‚РµСЂРЅРµС‚Рµ Рё РѕРЅР»Р°Р№РЅ-СѓРіСЂРѕР·Р°С….</div><div class="help-phone">8-800-25-000-15</div><div class="help-hrs">вЏ° РџРЅвЂ“РџС‚, 9:00вЂ“18:00</div></div>
+      <div class="help-card"><div class="help-type">рџЏ™ РњРѕСЃРєРІР°</div><div class="help-name">РњРѕСЃРєРѕРІСЃРєР°СЏ СЃР»СѓР¶Р±Р° РїСЃРёС…РѕР»РѕРіРёС‡РµСЃРєРѕР№ РїРѕРјРѕС‰Рё</div><div class="help-desc">Р‘РµСЃРїР»Р°С‚РЅР°СЏ РїРѕРјРѕС‰СЊ РґР»СЏ РјРѕСЃРєРІРёС‡РµР№.</div><div class="help-phone">8-800-100-23-85</div><div class="help-hrs">вЏ° РљСЂСѓРіР»РѕСЃСѓС‚РѕС‡РЅРѕ</div></div>
+    </div>
+  </div>
+ 
+</div>
+ 
+<script>
+document.addEventListener('keydown', e => { if(e.key==='Escape') stealth(); });
+function stealth(){ window.location.href='https://www.google.com'; }
+function toggleSOS(){ document.getElementById('sos-overlay').classList.toggle('active'); }
+ 
+const DAYS=['Р’СЃ','РџРЅ','Р’С‚','РЎСЂ','Р§С‚','РџС‚','РЎР±'];
+const MOOD_VAL={РѕС‚Р»РёС‡РЅРѕ:5,С…РѕСЂРѕС€Рѕ:4,РЅРѕСЂРјР°Р»СЊРЅРѕ:3,РїР»РѕС…Рѕ:2,С‚СЂРµРІРѕР¶РЅРѕ:1};
+function getHistory(){ try{return JSON.parse(localStorage.getItem('wm_mood')||'{}');}catch{return{};} }
+function saveHistory(h){ try{localStorage.setItem('wm_mood',JSON.stringify(h));}catch{} }
+ 
+function renderGraph(){
+  const h=getHistory();
+  const daysEl=document.getElementById('trackerDays');
+  const svg=document.getElementById('moodGraph');
+  const labels=[],vals=[];
+  for(let i=6;i>=0;i--){
+    const d=new Date(); d.setDate(d.getDate()-i);
+    const key=d.toISOString().slice(0,10);
+    labels.push(DAYS[d.getDay()]);
+    vals.push(h[key]!==undefined?h[key]:null);
+  }
+  daysEl.innerHTML=labels.map(l=>`<div class="tracker-day">${l}</div>`).join('');
+  if(vals.filter(v=>v!==null).length<2){
+    svg.innerHTML=`<text x="150" y="45" text-anchor="middle" fill="#555" font-size="12" font-family="Inter">Р—Р°С…РѕРґРё РєР°Р¶РґС‹Р№ РґРµРЅСЊ вЂ” РїРѕСЏРІРёС‚СЃСЏ РіСЂР°С„РёРє</text>`;
+    return;
+  }
+  const pts=vals.map((v,i)=>v===null?null:{x:(i/6)*300,y:70-((v-1)/4)*60}).filter(Boolean);
+  const linePts=pts.map(p=>`${p.x},${p.y}`).join(' ');
+  const areaPts=`${pts[0].x},75 `+pts.map(p=>`${p.x},${p.y}`).join(' ')+` ${pts[pts.length-1].x},75`;
+  svg.innerHTML=`<defs><linearGradient id="grd" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ff6b35" stop-opacity=".3"/><stop offset="100%" stop-color="#ff6b35" stop-opacity="0"/></linearGradient></defs>
+    <polygon points="${areaPts}" fill="url(#grd)"/>
+    <polyline points="${linePts}" fill="none" stroke="#ff6b35" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+    ${pts.map(p=>`<circle cx="${p.x}" cy="${p.y}" r="4" fill="#ff6b35"/>`).join('')}`;
+  const recent=vals.slice(-5).filter(v=>v!==null);
+  if(recent.length>=4&&recent.every((v,i)=>i===0||v<=recent[i-1])){
+    setTimeout(()=>{
+      const warn=document.createElement('div');
+      warn.style.cssText='margin-top:.8rem;padding:.7rem 1rem;background:rgba(255,60,60,.1);border:1px solid rgba(255,60,60,.2);border-radius:10px;font-size:.82rem;color:#ff9090;';
+      warn.innerHTML='рџ“‰ РџРѕСЃР»РµРґРЅРёРµ РґРЅРё С‚РµР±Рµ РЅРµРїСЂРѕСЃС‚Рѕ. <span onclick="pg(\'community\')" style="cursor:pointer;color:#ff6b35;font-weight:600;">в†’ СЃРѕРѕР±С‰РµСЃС‚РІРѕ</span> РёР»Рё <span onclick="pg(\'help\')" style="cursor:pointer;color:#ff6b35;font-weight:600;">С‚РµР»РµС„РѕРЅ РґРѕРІРµСЂРёСЏ</span>';
+      document.querySelector('.tracker-card').appendChild(warn);
+    },500);
+  }
+}
+ 
+let mood='',moodEmoji='';
+function pickMood(el,m,e){
+  document.querySelectorAll('.gate-mood').forEach(x=>x.classList.remove('sel'));
+  el.classList.add('sel'); mood=m; moodEmoji=e;
+  document.getElementById('gateBtn').classList.add('on');
+}
+function enterApp(){
+  if(!mood)return;
+  const h=getHistory();
+  const today=new Date().toISOString().slice(0,10);
+  h[today]=MOOD_VAL[mood]||3;
+  saveHistory(h);
+  document.getElementById('mood-gate').classList.add('hide');
+  document.getElementById('app').classList.add('on');
+  const g={РѕС‚Р»РёС‡РЅРѕ:`${moodEmoji} РћС‚Р»РёС‡РЅРѕ вЂ” РґРµСЂР¶Рё СЌС‚РѕС‚ РЅР°СЃС‚СЂРѕР№!`,С…РѕСЂРѕС€Рѕ:`${moodEmoji} РҐРѕСЂРѕС€Рѕ вЂ” СѓР¶Рµ РЅРµРїР»РѕС…Рѕ`,РЅРѕСЂРјР°Р»СЊРЅРѕ:`${moodEmoji} РќРѕСЂРјР°Р»СЊРЅРѕ вЂ” РїСЂРѕРІРµСЂСЊ РєР°Рє С‚С‹ РЅР° СЃР°РјРѕРј РґРµР»Рµ`,РїР»РѕС…Рѕ:`${moodEmoji} РџР»РѕС…РѕР№ РґРµРЅСЊ вЂ” СЌС‚Рѕ РІСЂРµРјРµРЅРЅРѕ`,С‚СЂРµРІРѕР¶РЅРѕ:`${moodEmoji} РўСЂРµРІРѕРіР° вЂ” СЂР°Р·Р±РµСЂС‘РјСЃСЏ С‡С‚Рѕ РїСЂРѕРёСЃС…РѕРґРёС‚`};
+  document.getElementById('moodBadge').textContent=g[mood]||'рџ‘‹ РџСЂРёРІРµС‚!';
+  setTimeout(renderGraph,300);
+}
+ 
+function pg(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  document.getElementById('page-'+id).classList.add('on');
+  closeMenu();
+  document.querySelectorAll('.drawer-link').forEach(link=>link.classList.toggle('on',link.dataset.page===id));
+  window.scrollTo(0,0);
+}
+
+function toggleMenu(){
+  document.getElementById('menuDrawer').classList.toggle('on');
+}
+
+function closeMenu(){
+  document.getElementById('menuDrawer')?.classList.remove('on');
+}
+
+function openAuthSoon(reason){
+  const modal=document.getElementById('authSoon');
+  const text=document.getElementById('authSoonReason');
+  if(text && reason)text.textContent=reason;
+  if(modal)modal.classList.add('on');
+}
+
+function closeAuthSoon(){
+  document.getElementById('authSoon')?.classList.remove('on');
+}
+
+function submitAuthSoon(){
+  const login=document.getElementById('authLogin')?.value.trim();
+  const pass=document.getElementById('authPassword')?.value.trim();
+  if(!login || !pass){
+    openAuthSoon('Р’РІРµРґРёС‚Рµ Р»РѕРіРёРЅ Рё РїР°СЂРѕР»СЊ. РџРѕР»РЅРѕС†РµРЅРЅС‹Р№ РІС…РѕРґ РїРѕСЏРІРёС‚СЃСЏ СЃРєРѕСЂРѕ.');
+    return;
+  }
+  openAuthSoon('РЎРїР°СЃРёР±Рѕ. РЎРёСЃС‚РµРјР° РІС…РѕРґР° Рё РєР°Р±РёРЅРµС‚С‹ СѓС‡РµРЅРёРєР°/СѓС‡РёС‚РµР»СЏ Р±СѓРґСѓС‚ Р°РєС‚РёРІРёСЂРѕРІР°РЅС‹ РІ Р±Р»РёР¶Р°Р№С€РµРј РѕР±РЅРѕРІР»РµРЅРёРё.');
+}
+
+function sidebarJump(section){
+  if(section==='chats'){
+    openAuthSoon('Р§С‚РѕР±С‹ РѕС‚РєСЂС‹С‚СЊ С‡Р°С‚С‹, РЅСѓР¶РµРЅ РІС…РѕРґ РІ Р°РєРєР°СѓРЅС‚. Р›РѕРіРёРЅ Рё РїР°СЂРѕР»СЊ Р±СѓРґСѓС‚ РґРѕСЃС‚СѓРїРЅС‹ СЃРєРѕСЂРѕ.');
+    document.querySelectorAll('.rail-item').forEach(item=>item.classList.toggle('on',item.dataset.rail===section));
+    return;
+  }
+  if(section==='post'){
+    openAuthSoon('Р§С‚РѕР±С‹ СЃРѕР·РґР°С‚СЊ РїРѕСЃС‚, РЅСѓР¶РµРЅ РІС…РѕРґ РІ Р°РєРєР°СѓРЅС‚. Р¤СѓРЅРєС†РёСЏ РІС…РѕРґР° Р±СѓРґРµС‚ РґРѕР±Р°РІР»РµРЅР° СЃРєРѕСЂРѕ.');
+    document.querySelectorAll('.rail-item').forEach(item=>item.classList.toggle('on',item.dataset.rail===section));
+    return;
+  }
+  pg('community');
+  document.querySelectorAll('.rail-item').forEach(item=>item.classList.toggle('on',item.dataset.rail===section));
+  const targetMap={
+    profile:'community-profile',
+    community:'community-feed',
+    chats:'community-chats',
+    post:'community-post'
+  };
+  const target=document.getElementById(targetMap[section]);
+  if(target)target.scrollIntoView({behavior:'smooth',block:'start'});
+}
+ 
+const OPT_FREQ4=['РќРёРєРѕРіРґР°','Р РµРґРєРѕ','РРЅРѕРіРґР°','Р§Р°СЃС‚Рѕ'];
+const OPT_AGREE5=['РЎРѕРІСЃРµРј РЅРµ СЃРѕРіР»Р°СЃРµРЅ','РЎРєРѕСЂРµРµ РЅРµ СЃРѕРіР»Р°СЃРµРЅ','Р—Р°С‚СЂСѓРґРЅСЏСЋСЃСЊ','РЎРєРѕСЂРµРµ СЃРѕРіР»Р°СЃРµРЅ','РџРѕР»РЅРѕСЃС‚СЊСЋ СЃРѕРіР»Р°СЃРµРЅ'];
+const OPT_USE4=['РќРµ РёСЃРїРѕР»СЊР·СѓСЋ','РРЅРѕРіРґР°','Р§Р°СЃС‚Рѕ','РџРѕС‡С‚Рё РІСЃРµРіРґР°'];
+function makeQuestions(items,opts,reverseIdx=[]){
+  const reversed=[...Array(opts.length).keys()].reverse();
+  return items.map((q,i)=>reverseIdx.includes(i)?{q,opts,values:reversed}:{q,opts});
+}
+
+const tests={
+  beck:{
+    name:'РЁРєР°Р»Р° Р‘РµРєР° (BDI)',
+    desc:'Р’С‹Р±РµСЂРё СѓС‚РІРµСЂР¶РґРµРЅРёРµ РєРѕС‚РѕСЂРѕРµ Р»СѓС‡С€Рµ РѕРїРёСЃС‹РІР°РµС‚ С‚РІРѕС‘ СЃРѕСЃС‚РѕСЏРЅРёРµ Р·Р° РїРѕСЃР»РµРґРЅРёРµ 2 РЅРµРґРµР»Рё',
+    questions:[
+      {q:'Р“СЂСѓСЃС‚СЊ',opts:['РЇ РЅРµ С‡СѓРІСЃС‚РІСѓСЋ СЃРµР±СЏ СЂР°СЃСЃС‚СЂРѕРµРЅРЅС‹Рј','РњРЅРµ РіСЂСѓСЃС‚РЅРѕ','РњРЅРµ РІСЃС‘ РІСЂРµРјСЏ РіСЂСѓСЃС‚РЅРѕ Рё СЏ РЅРµ РјРѕРіСѓ РѕС‚ СЌС‚РѕРіРѕ РѕСЃРІРѕР±РѕРґРёС‚СЊСЃСЏ','РњРЅРµ С‚Р°Рє РіСЂСѓСЃС‚РЅРѕ С‡С‚Рѕ СЏ РЅРµ РјРѕРіСѓ СЌС‚Рѕ РІС‹РЅРѕСЃРёС‚СЊ']},
+      {q:'РџРµСЃСЃРёРјРёР·Рј',opts:['РЇ СЃРјРѕС‚СЂСЋ РІ Р±СѓРґСѓС‰РµРµ СЃ РѕРїС‚РёРјРёР·РјРѕРј','РЇ РґСѓРјР°СЋ С‡С‚Рѕ Р±СѓРґСѓС‰РµРµ Р±СѓРґРµС‚ С‚СЂСѓРґРЅС‹Рј','РЇ С‡СѓРІСЃС‚РІСѓСЋ С‡С‚Рѕ Сѓ РјРµРЅСЏ РЅРµС‚ Р±СѓРґСѓС‰РµРіРѕ','РњРѕС‘ Р±СѓРґСѓС‰РµРµ Р±РµР·РЅР°РґС‘Р¶РЅРѕ']},
+      {q:'РћС‰СѓС‰РµРЅРёРµ РЅРµСѓРґР°С‡Рё',opts:['РЇ РЅРµ С‡СѓРІСЃС‚РІСѓСЋ СЃРµР±СЏ РЅРµСѓРґР°С‡РЅРёРєРѕРј','РЇ С‚РµСЂРїРµР» РЅРµСѓРґР°С‡ Р±РѕР»СЊС€Рµ С‡РµРј РґСЂСѓРіРёРµ','РљРѕРіРґР° СЃРјРѕС‚СЂСЋ РЅР°Р·Р°Рґ вЂ” РІРёР¶Сѓ РјРЅРѕРіРѕ РЅРµСѓРґР°С‡','РЇ С‡СѓРІСЃС‚РІСѓСЋ С‡С‚Рѕ РїРѕС‚РµСЂРїРµР» РїРѕР»РЅС‹Р№ РїСЂРѕРІР°Р» РєР°Рє Р»РёС‡РЅРѕСЃС‚СЊ']},
+      {q:'РЈРґРѕРІР»РµС‚РІРѕСЂРµРЅРёРµ',opts:['РЇ РїРѕР»СѓС‡Р°СЋ СѓРґРѕРІРѕР»СЊСЃС‚РІРёРµ РєР°Рє РѕР±С‹С‡РЅРѕ','РЇ РїРѕР»СѓС‡Р°СЋ РјРµРЅСЊС€Рµ СѓРґРѕРІРѕР»СЊСЃС‚РІРёСЏ С‡РµРј СЂР°РЅСЊС€Рµ','Р‘РѕР»СЊС€Рµ РЅРёС‡С‚Рѕ РЅРµ РґР°С‘С‚ РЅР°СЃС‚РѕСЏС‰РµРіРѕ СѓРґРѕРІР»РµС‚РІРѕСЂРµРЅРёСЏ','РЇ РІСЃРµРј РЅРµРґРѕРІРѕР»РµРЅ РёР»Рё СЃРєСѓС‡Р°СЋ РїРѕ РІСЃРµРјСѓ']},
+      {q:'Р§СѓРІСЃС‚РІРѕ РІРёРЅС‹',opts:['РЇ РЅРµ С‡СѓРІСЃС‚РІСѓСЋ РЅРёРєР°РєРѕР№ РІРёРЅС‹','Р—РЅР°С‡РёС‚РµР»СЊРЅСѓСЋ С‡Р°СЃС‚СЊ РІСЂРµРјРµРЅРё С‡СѓРІСЃС‚РІСѓСЋ РІРёРЅСѓ','Р‘РѕР»СЊС€СѓСЋ С‡Р°СЃС‚СЊ РІСЂРµРјРµРЅРё С‡СѓРІСЃС‚РІСѓСЋ СЃРµР±СЏ РІРёРЅРѕРІРЅС‹Рј','РЇ РїРѕСЃС‚РѕСЏРЅРЅРѕ С‡СѓРІСЃС‚РІСѓСЋ СЃРµР±СЏ РІРёРЅРѕРІРЅС‹Рј']},
+      {q:'РЎР°РјРѕРѕС†РµРЅРєР°',opts:['РЇ РЅРµ СЂР°Р·РѕС‡Р°СЂРѕРІР°РЅ РІ СЃРµР±Рµ','РЇ СЂР°Р·РѕС‡Р°СЂРѕРІР°РЅ РІ СЃРµР±Рµ','РЇ РёСЃРїС‹С‚С‹РІР°СЋ РѕС‚РІСЂР°С‰РµРЅРёРµ Рє СЃРµР±Рµ','РЇ РЅРµРЅР°РІРёР¶Сѓ СЃРµР±СЏ']},
+      {q:'РЎР°РјРѕРѕР±РІРёРЅРµРЅРёРµ',opts:['РЇ РЅРµ С‡СѓРІСЃС‚РІСѓСЋ С‡С‚Рѕ С…СѓР¶Рµ РґСЂСѓРіРёС…','РЇ РєСЂРёС‚РёРєСѓСЋ СЃРІРѕРё СЃР»Р°Р±РѕСЃС‚Рё Рё РѕС€РёР±РєРё','РЇ РІСЃС‘ РІСЂРµРјСЏ РѕР±РІРёРЅСЏСЋ СЃРµР±СЏ Р·Р° СЃРІРѕРё РїРѕСЃС‚СѓРїРєРё','РЇ РІРёРЅСЋ СЃРµР±СЏ РІРѕ РІСЃС‘Рј РїР»РѕС…РѕРј С‡С‚Рѕ РїСЂРѕРёСЃС…РѕРґРёС‚']},
+      {q:'РЎСѓРёС†РёРґР°Р»СЊРЅС‹Рµ РјС‹СЃР»Рё',opts:['РЈ РјРµРЅСЏ РЅРµС‚ РјС‹СЃР»РµР№ Рѕ РїСЂРёС‡РёРЅРµРЅРёРё СЃРµР±Рµ РІСЂРµРґР°','РРЅРѕРіРґР° С‚Р°РєРёРµ РјС‹СЃР»Рё Р±С‹РІР°СЋС‚ вЂ” РЅРѕ СЏ РёРј РЅРµ СЃР»РµРґСѓСЋ','РЇ С…РѕС‚РµР» Р±С‹ СѓРјРµСЂРµС‚СЊ','РЇ Р±С‹ СѓР±РёР» СЃРµР±СЏ РµСЃР»Рё Р±С‹ РёРјРµР» РІРѕР·РјРѕР¶РЅРѕСЃС‚СЊ']},
+      {q:'РЎР»С‘Р·С‹',opts:['РЇ РїР»Р°С‡Сѓ РЅРµ Р±РѕР»СЊС€Рµ РѕР±С‹С‡РЅРѕРіРѕ','РЎРµР№С‡Р°СЃ СЏ РїР»Р°С‡Сѓ Р±РѕР»СЊС€Рµ С‡РµРј РѕР±С‹С‡РЅРѕ','РЇ РїР»Р°С‡Сѓ РїРѕСЃС‚РѕСЏРЅРЅРѕ','Р Р°РЅСЊС€Рµ РјРѕРі РїР»Р°РєР°С‚СЊ вЂ” СЃРµР№С‡Р°СЃ РґР°Р¶Рµ РµСЃР»Рё С…РѕС‡Сѓ РЅРµ РјРѕРіСѓ']},
+      {q:'Р Р°Р·РґСЂР°Р¶РёС‚РµР»СЊРЅРѕСЃС‚СЊ',opts:['РњРµРЅСЏ СЂР°Р·РґСЂР°Р¶Р°РµС‚ РЅРµ Р±РѕР»СЊС€Рµ С‡РµРј РѕР±С‹С‡РЅРѕ','РЇ С‡СѓС‚СЊ Р±РѕР»СЊС€Рµ РѕР±С‹С‡РЅРѕРіРѕ СЂР°Р·РґСЂР°Р¶Р°СЋСЃСЊ','РњРµРЅСЏ СЃРёР»СЊРЅРѕ СЂР°Р·РґСЂР°Р¶Р°СЋС‚ РІРµС‰Рё','Р’СЃС‘ С‡С‚Рѕ СЂР°РЅСЊС€Рµ СЂР°Р·РґСЂР°Р¶Р°Р»Рѕ вЂ” С‚РµРїРµСЂСЊ РЅРµ С‚СЂРѕРіР°РµС‚']},
+      {q:'РћР±С‰РµРЅРёРµ',opts:['РЇ РЅРµ РїРѕС‚РµСЂСЏР» РёРЅС‚РµСЂРµСЃ Рє Р»СЋРґСЏРј','РЇ РјРµРЅРµРµ Р·Р°РёРЅС‚РµСЂРµСЃРѕРІР°РЅ РІ Р»СЋРґСЏС… С‡РµРј СЂР°РЅСЊС€Рµ','РЇ РїРѕС‚РµСЂСЏР» Р±РѕР»СЊС€СѓСЋ С‡Р°СЃС‚СЊ РёРЅС‚РµСЂРµСЃР° Рє Р»СЋРґСЏРј','РЇ РїРѕС‚РµСЂСЏР» РІРµСЃСЊ РёРЅС‚РµСЂРµСЃ Рє Р»СЋРґСЏРј']},
+      {q:'РџСЂРёРЅСЏС‚РёРµ СЂРµС€РµРЅРёР№',opts:['РЇ РїСЂРёРЅРёРјР°СЋ СЂРµС€РµРЅРёСЏ С‚Р°Рє Р¶Рµ С…РѕСЂРѕС€Рѕ РєР°Рє РІСЃРµРіРґР°','РЇ РѕС‚РєР»Р°РґС‹РІР°СЋ СЂРµС€РµРЅРёСЏ С‡Р°С‰Рµ С‡РµРј СЂР°РЅСЊС€Рµ','РњРЅРµ С‚СЂСѓРґРЅРѕ РїСЂРёРЅРёРјР°С‚СЊ СЂРµС€РµРЅРёСЏ','РЇ РІРѕРѕР±С‰Рµ РЅРµ РјРѕРіСѓ РїСЂРёРЅРёРјР°С‚СЊ СЂРµС€РµРЅРёР№']},
+      {q:'Р Р°Р±РѕС‚РѕСЃРїРѕСЃРѕР±РЅРѕСЃС‚СЊ',opts:['РЇ СЂР°Р±РѕС‚Р°СЋ С‚Р°Рє Р¶Рµ С…РѕСЂРѕС€Рѕ РєР°Рє РїСЂРµР¶РґРµ','РњРЅРµ РЅСѓР¶РЅС‹ РґРѕРїРѕР»РЅРёС‚РµР»СЊРЅС‹Рµ СѓСЃРёР»РёСЏ С‡С‚РѕР±С‹ РЅР°С‡Р°С‚СЊ','РЇ СЃ С‚СЂСѓРґРѕРј Р·Р°СЃС‚Р°РІР»СЏСЋ СЃРµР±СЏ РґРµР»Р°С‚СЊ С‡С‚Рѕ-Р»РёР±Рѕ','РЇ РІРѕРѕР±С‰Рµ РЅРµ РјРѕРіСѓ РґРµР»Р°С‚СЊ РЅРёРєР°РєРѕР№ СЂР°Р±РѕС‚С‹']},
+      {q:'РЎРѕРЅ',opts:['РЇ СЃРїР»СЋ С‚Р°Рє Р¶Рµ С…РѕСЂРѕС€Рѕ РєР°Рє РѕР±С‹С‡РЅРѕ','РЎРµР№С‡Р°СЃ СЏ СЃРїР»СЋ С…СѓР¶Рµ С‡РµРј РѕР±С‹С‡РЅРѕ','РЇ РІСЃС‚Р°СЋ РЅР° 1вЂ“2 С‡Р°СЃР° СЂР°РЅСЊС€Рµ Рё С‚СЂСѓРґРЅРѕ Р·Р°СЃС‹РїР°СЋ','РЇ РІСЃС‚Р°СЋ РЅР° РЅРµСЃРєРѕР»СЊРєРѕ С‡Р°СЃРѕРІ СЂР°РЅСЊС€Рµ Рё РЅРµ РјРѕРіСѓ Р·Р°СЃРЅСѓС‚СЊ']},
+      {q:'РЈСЃС‚Р°Р»РѕСЃС‚СЊ',opts:['РЇ СѓСЃС‚Р°СЋ РЅРµ Р±РѕР»СЊС€Рµ РѕР±С‹С‡РЅРѕРіРѕ','РЇ СѓСЃС‚Р°СЋ Р±С‹СЃС‚СЂРµРµ С‡РµРј РѕР±С‹С‡РЅРѕ','РЇ СѓСЃС‚Р°СЋ РїРѕС‡С‚Рё РѕС‚ РІСЃРµРіРѕ С‡С‚Рѕ РґРµР»Р°СЋ','РЇ СЃР»РёС€РєРѕРј СѓСЃС‚Р°Р» С‡С‚РѕР±С‹ С‡С‚Рѕ-Р»РёР±Рѕ РґРµР»Р°С‚СЊ']},
+      {q:'РђРїРїРµС‚РёС‚',opts:['РњРѕР№ Р°РїРїРµС‚РёС‚ РЅРµ С…СѓР¶Рµ РѕР±С‹С‡РЅРѕРіРѕ','РњРѕР№ Р°РїРїРµС‚РёС‚ РЅРµРјРЅРѕРіРѕ С…СѓР¶Рµ','РњРѕР№ Р°РїРїРµС‚РёС‚ Р·РЅР°С‡РёС‚РµР»СЊРЅРѕ С…СѓР¶Рµ','РЈ РјРµРЅСЏ СЃРѕРІСЃРµРј РЅРµС‚ Р°РїРїРµС‚РёС‚Р°']},
+      {q:'Р’РµСЃ',opts:['Р’ РїРѕСЃР»РµРґРЅРµРµ РІСЂРµРјСЏ СЏ РЅРµ РїРѕС…СѓРґРµР»','РЇ РїРѕС…СѓРґРµР» Р±РѕР»РµРµ С‡РµРј РЅР° 2 РєРі','РЇ РїРѕС…СѓРґРµР» Р±РѕР»РµРµ С‡РµРј РЅР° 5 РєРі','РЇ РЅР°РјРµСЂРµРЅРЅРѕ РїС‹С‚Р°СЋСЃСЊ РїРѕС…СѓРґРµС‚СЊ']},
+      {q:'Р—РґРѕСЂРѕРІСЊРµ',opts:['РЇ Р±РµСЃРїРѕРєРѕСЋСЃСЊ Рѕ Р·РґРѕСЂРѕРІСЊРµ РЅРµ Р±РѕР»СЊС€Рµ РѕР±С‹С‡РЅРѕРіРѕ','РњРµРЅСЏ Р±РµСЃРїРѕРєРѕСЏС‚ С„РёР·РёС‡РµСЃРєРёРµ РїСЂРѕР±Р»РµРјС‹ вЂ” Р±РѕР»Рё','РњРµРЅСЏ РѕС‡РµРЅСЊ Р±РµСЃРїРѕРєРѕСЏС‚ С„РёР·РёС‡РµСЃРєРёРµ РїСЂРѕР±Р»РµРјС‹','РЇ С‚Р°Рє РѕР±РµСЃРїРѕРєРѕРµРЅ С„РёР·РёС‡РµСЃРєРёРјРё РїСЂРѕР±Р»РµРјР°РјРё С‡С‚Рѕ РЅРё Рѕ С‡С‘Рј РґСЂСѓРіРѕРј РЅРµ РґСѓРјР°СЋ']},
+      {q:'РљРѕРЅС†РµРЅС‚СЂР°С†РёСЏ',opts:['РЇ РєРѕРЅС†РµРЅС‚СЂРёСЂСѓСЋСЃСЊ С‚Р°Рє Р¶Рµ С…РѕСЂРѕС€Рѕ РєР°Рє РІСЃРµРіРґР°','РњРЅРµ С‚СЂСѓРґРЅРµРµ СЃРѕСЃСЂРµРґРѕС‚РѕС‡РёС‚СЊСЃСЏ С‡РµРј РѕР±С‹С‡РЅРѕ','РњРЅРµ РѕС‡РµРЅСЊ С‚СЂСѓРґРЅРѕ РЅР° С‡С‘Рј-Р»РёР±Рѕ СЃРѕСЃСЂРµРґРѕС‚РѕС‡РёС‚СЊСЃСЏ','РЇ РІРѕРѕР±С‰Рµ РЅРµ РјРѕРіСѓ РЅРё РЅР° С‡С‘Рј СЃРѕСЃСЂРµРґРѕС‚РѕС‡РёС‚СЊСЃСЏ']},
+      {q:'РРЅС‚РµСЂРµСЃ Рє Р¶РёР·РЅРё',opts:['РЇ РЅРµ Р·Р°РјРµС‚РёР» РёР·РјРµРЅРµРЅРёР№ РІ СЃРІРѕРёС… РёРЅС‚РµСЂРµСЃР°С…','РЇ РјРµРЅРµРµ Р·Р°РёРЅС‚РµСЂРµСЃРѕРІР°РЅ РІ Р»СЋРґСЏС… Рё РІРµС‰Р°С…','РЇ РїРѕС‚РµСЂСЏР» РїРѕС‡С‚Рё РІРµСЃСЊ РёРЅС‚РµСЂРµСЃ Рє Р»СЋРґСЏРј Рё РІРµС‰Р°Рј','РњРЅРµ С‚СЂСѓРґРЅРѕ РёРЅС‚РµСЂРµСЃРѕРІР°С‚СЊСЃСЏ С‡РµРј-Р»РёР±Рѕ']},
+      {q:'РЎР°РјРѕС†РµРЅРЅРѕСЃС‚СЊ',opts:['РЇ С‡СѓРІСЃС‚РІСѓСЋ СЃРµР±СЏ С‚Р°Рє Р¶Рµ С†РµРЅРЅС‹Рј РєР°Рє РїСЂРµР¶РґРµ','РЇ С‡СѓРІСЃС‚РІСѓСЋ СЃРµР±СЏ РјРµРЅРµРµ С†РµРЅРЅС‹Рј С‡РµРј РїСЂРµР¶РґРµ','РЇ С‡СѓРІСЃС‚РІСѓСЋ СЃРµР±СЏ РјРµРЅРµРµ С†РµРЅРЅС‹Рј РїРѕ СЃСЂР°РІРЅРµРЅРёСЋ СЃ РґСЂСѓРіРёРјРё','РЇ С‡СѓРІСЃС‚РІСѓСЋ С‡С‚Рѕ РІРѕРѕР±С‰Рµ РЅРµ РёРјРµСЋ РЅРёРєР°РєРѕР№ С†РµРЅРЅРѕСЃС‚Рё']},
+    ],
+    score:(s)=>{
+      if(s<=9)return{emoji:'рџЊ',title:'РњРёРЅРёРјР°Р»СЊРЅР°СЏ РґРµРїСЂРµСЃСЃРёСЏ',text:'РџСЂРёР·РЅР°РєРѕРІ РґРµРїСЂРµСЃСЃРёРё РЅРµС‚ РёР»Рё РѕРЅРё РјРёРЅРёРјР°Р»СЊРЅС‹.',level:'low',causes:[],solutions:['РџСЂРѕРґРѕР»Р¶Р°Р№ СЃР»РµРґРёС‚СЊ Р·Р° СЃРІРѕРёРј СЃРѕСЃС‚РѕСЏРЅРёРµРј','Р¤РёР·РёС‡РµСЃРєР°СЏ Р°РєС‚РёРІРЅРѕСЃС‚СЊ Рё СЃРѕРЅ вЂ” Р»СѓС‡С€Р°СЏ РїСЂРѕС„РёР»Р°РєС‚РёРєР°']};
+      if(s<=18)return{emoji:'рџђ',title:'Р›С‘РіРєР°СЏ РґРµРїСЂРµСЃСЃРёСЏ',text:'Р•СЃС‚СЊ РЅРµРєРѕС‚РѕСЂС‹Рµ РїСЂРёР·РЅР°РєРё РґРµРїСЂРµСЃСЃРёРІРЅРѕРіРѕ СЃРѕСЃС‚РѕСЏРЅРёСЏ.',level:'mid',causes:['РЎРЅРёР¶РµРЅРЅС‹Р№ С„РѕРЅ РјРѕР¶РµС‚ Р±С‹С‚СЊ СЂРµР°РєС†РёРµР№ РЅР° СЃС‚СЂРµСЃСЃ'],solutions:['РџРѕРіРѕРІРѕСЂРё СЃ РєРµРј-С‚Рѕ РєРѕРјСѓ РґРѕРІРµСЂСЏРµС€СЊ','РџРѕРїСЂРѕР±СѓР№ С‚РµС…РЅРёРєРё СЃР°РјРѕРїРѕРјРѕС‰Рё вЂ” РґС‹С…Р°РЅРёРµ, РїСЂРѕРіСѓР»РєРё']};
+      if(s<=29)return{emoji:'рџџ',title:'РЈРјРµСЂРµРЅРЅР°СЏ РґРµРїСЂРµСЃСЃРёСЏ',text:'РќРµ РѕСЃС‚Р°РІР°Р№СЃСЏ СЃ СЌС‚РёРј РѕРґРёРЅ.',level:'high',causes:['РЈРјРµСЂРµРЅРЅР°СЏ РґРµРїСЂРµСЃСЃРёСЏ РІР»РёСЏРµС‚ РЅР° РєР°С‡РµСЃС‚РІРѕ Р¶РёР·РЅРё','Р‘РµР· РїРѕРјРѕС‰Рё РјРѕР¶РµС‚ СѓС…СѓРґС€РёС‚СЊСЃСЏ'],solutions:['РћР±СЂР°С‚РёСЃСЊ Рє С€РєРѕР»СЊРЅРѕРјСѓ РїСЃРёС…РѕР»РѕРіСѓ','8-800-2000-122 вЂ” Р±РµСЃРїР»Р°С‚РЅРѕ Рё РєРѕРЅС„РёРґРµРЅС†РёР°Р»СЊРЅРѕ']};
+      return{emoji:'рџ†',title:'Р’С‹СЂР°Р¶РµРЅРЅР°СЏ РґРµРїСЂРµСЃСЃРёСЏ',text:'РџРѕР¶Р°Р»СѓР№СЃС‚Р°, РѕР±СЂР°С‚РёСЃСЊ Р·Р° РїРѕРјРѕС‰СЊСЋ РїСЂСЏРјРѕ СЃРµР№С‡Р°СЃ.',level:'urgent',causes:['РўС‹ РЅРµ РІРёРЅРѕРІР°С‚ РІ С‚РѕРј С‡С‚Рѕ С‡СѓРІСЃС‚РІСѓРµС€СЊ'],solutions:['РџРѕР·РІРѕРЅРё РїСЂСЏРјРѕ СЃРµР№С‡Р°СЃ: 8-800-2000-122','РЎРєР°Р¶Рё РІР·СЂРѕСЃР»РѕРјСѓ РєРѕС‚РѕСЂРѕРјСѓ РґРѕРІРµСЂСЏРµС€СЊ']};
+    }
+  },
+  spielberger:{
+    name:'РўРµСЃС‚ С‚СЂРµРІРѕР¶РЅРѕСЃС‚Рё (РЎРїРёР»Р±РµСЂРіРµСЂ-РҐР°РЅРёРЅ)',
+    desc:'РљР°Рє С‚С‹ СЃРµР±СЏ С‡СѓРІСЃС‚РІСѓРµС€СЊ РџР РЇРњРћ РЎР•Р™Р§РђРЎ?',
+    questions:[
+      {q:'РЇ СЃРїРѕРєРѕРµРЅ',opts:['РќРµС‚','РџРѕР¶Р°Р»СѓР№ РґР°','Р’РµСЂРЅРѕ','РЎРѕРІРµСЂС€РµРЅРЅРѕ РІРµСЂРЅРѕ']},
+      {q:'РњРЅРµ РЅРёС‡С‚Рѕ РЅРµ СѓРіСЂРѕР¶Р°РµС‚',opts:['РќРµС‚','РџРѕР¶Р°Р»СѓР№ РґР°','Р’РµСЂРЅРѕ','РЎРѕРІРµСЂС€РµРЅРЅРѕ РІРµСЂРЅРѕ']},
+      {q:'РЇ РЅР°С…РѕР¶СѓСЃСЊ РІ РЅР°РїСЂСЏР¶РµРЅРёРё',opts:['РќРµС‚','РџРѕР¶Р°Р»СѓР№ РґР°','Р’РµСЂРЅРѕ','РЎРѕРІРµСЂС€РµРЅРЅРѕ РІРµСЂРЅРѕ']},
+      {q:'РЇ СЂР°СЃСЃС‚СЂРѕРµРЅ',opts:['РќРµС‚','РџРѕР¶Р°Р»СѓР№ РґР°','Р’РµСЂРЅРѕ','РЎРѕРІРµСЂС€РµРЅРЅРѕ РІРµСЂРЅРѕ']},
+      {q:'РЇ С‡СѓРІСЃС‚РІСѓСЋ СЃРµР±СЏ СЃРІРѕР±РѕРґРЅРѕ',opts:['РќРµС‚','РџРѕР¶Р°Р»СѓР№ РґР°','Р’РµСЂРЅРѕ','РЎРѕРІРµСЂС€РµРЅРЅРѕ РІРµСЂРЅРѕ']},
+      {q:'РњРµРЅСЏ РІРѕР»РЅСѓСЋС‚ РІРѕР·РјРѕР¶РЅС‹Рµ РЅРµСѓРґР°С‡Рё',opts:['РќРµС‚','РџРѕР¶Р°Р»СѓР№ РґР°','Р’РµСЂРЅРѕ','РЎРѕРІРµСЂС€РµРЅРЅРѕ РІРµСЂРЅРѕ']},
+      {q:'РЇ С‡СѓРІСЃС‚РІСѓСЋ СЃРµР±СЏ РѕС‚РґРѕС…РЅСѓРІС€РёРј',opts:['РќРµС‚','РџРѕР¶Р°Р»СѓР№ РґР°','Р’РµСЂРЅРѕ','РЎРѕРІРµСЂС€РµРЅРЅРѕ РІРµСЂРЅРѕ']},
+      {q:'РЇ РІСЃС‚СЂРµРІРѕР¶РµРЅ',opts:['РќРµС‚','РџРѕР¶Р°Р»СѓР№ РґР°','Р’РµСЂРЅРѕ','РЎРѕРІРµСЂС€РµРЅРЅРѕ РІРµСЂРЅРѕ']},
+      {q:'РЇ РЅРµСЂРІРЅРёС‡Р°СЋ',opts:['РќРµС‚','РџРѕР¶Р°Р»СѓР№ РґР°','Р’РµСЂРЅРѕ','РЎРѕРІРµСЂС€РµРЅРЅРѕ РІРµСЂРЅРѕ']},
+      {q:'РЇ РЅРµ РЅР°С…РѕР¶Сѓ СЃРµР±Рµ РјРµСЃС‚Р°, РЅРµ РјРѕРіСѓ СЂР°СЃСЃР»Р°Р±РёС‚СЊСЃСЏ',opts:['РќРµС‚','РџРѕР¶Р°Р»СѓР№ РґР°','Р’РµСЂРЅРѕ','РЎРѕРІРµСЂС€РµРЅРЅРѕ РІРµСЂРЅРѕ']},
+      {q:'РЇ РІР·РІРёРЅС‡РµРЅ',opts:['РќРµС‚','РџРѕР¶Р°Р»СѓР№ РґР°','Р’РµСЂРЅРѕ','РЎРѕРІРµСЂС€РµРЅРЅРѕ РІРµСЂРЅРѕ']},
+      {q:'РЇ РґРѕРІРѕР»РµРЅ',opts:['РќРµС‚','РџРѕР¶Р°Р»СѓР№ РґР°','Р’РµСЂРЅРѕ','РЎРѕРІРµСЂС€РµРЅРЅРѕ РІРµСЂРЅРѕ']},
+      {q:'РЇ РѕР·Р°Р±РѕС‡РµРЅ',opts:['РќРµС‚','РџРѕР¶Р°Р»СѓР№ РґР°','Р’РµСЂРЅРѕ','РЎРѕРІРµСЂС€РµРЅРЅРѕ РІРµСЂРЅРѕ']},
+      {q:'РЇ СЃР»РёС€РєРѕРј РІРѕР·Р±СѓР¶РґС‘РЅ Рё РјРЅРµ РЅРµ РїРѕ СЃРµР±Рµ',opts:['РќРµС‚','РџРѕР¶Р°Р»СѓР№ РґР°','Р’РµСЂРЅРѕ','РЎРѕРІРµСЂС€РµРЅРЅРѕ РІРµСЂРЅРѕ']},
+      {q:'РњРЅРµ СЂР°РґРѕСЃС‚РЅРѕ',opts:['РќРµС‚','РџРѕР¶Р°Р»СѓР№ РґР°','Р’РµСЂРЅРѕ','РЎРѕРІРµСЂС€РµРЅРЅРѕ РІРµСЂРЅРѕ']},
+    ],
+    score:(s)=>{
+      if(s<=15)return{emoji:'рџЊ',title:'РќРёР·РєР°СЏ С‚СЂРµРІРѕР¶РЅРѕСЃС‚СЊ',text:'РЈСЂРѕРІРµРЅСЊ С‚СЂРµРІРѕРіРё СЃРµР№С‡Р°СЃ РЅРёР·РєРёР№. РўС‹ РІ СЃРїРѕРєРѕР№РЅРѕРј СЃРѕСЃС‚РѕСЏРЅРёРё.',level:'low',causes:[],solutions:['РџСЂРѕРґРѕР»Р¶Р°Р№ РїРѕРґРґРµСЂР¶РёРІР°С‚СЊ СЌС‚РѕС‚ Р±Р°Р»Р°РЅСЃ']};
+      if(s<=30)return{emoji:'рџђ',title:'РЈРјРµСЂРµРЅРЅР°СЏ С‚СЂРµРІРѕР¶РЅРѕСЃС‚СЊ',text:'РўСЂРµРІРѕРіР° РµСЃС‚СЊ, РЅРѕ РІ РїСЂРµРґРµР»Р°С… РЅРѕСЂРјС‹.',level:'mid',causes:['РЈРјРµСЂРµРЅРЅР°СЏ С‚СЂРµРІРѕРіР° вЂ” РЅРѕСЂРјР°Р»СЊРЅР°СЏ СЂРµР°РєС†РёСЏ РЅР° СЃС‚СЂРµСЃСЃ'],solutions:['РџРѕРїСЂРѕР±СѓР№ РєРІР°РґСЂР°С‚РЅРѕРµ РґС‹С…Р°РЅРёРµ','Р¤РёР·РёС‡РµСЃРєР°СЏ Р°РєС‚РёРІРЅРѕСЃС‚СЊ СЃРЅРёР¶Р°РµС‚ С‚СЂРµРІРѕРіСѓ']};
+      return{emoji:'рџџ',title:'Р’С‹СЃРѕРєР°СЏ С‚СЂРµРІРѕР¶РЅРѕСЃС‚СЊ',text:'РЈСЂРѕРІРµРЅСЊ С‚СЂРµРІРѕРіРё РїРѕРІС‹С€РµРЅ. Р­С‚Рѕ РІР»РёСЏРµС‚ РЅР° СЃР°РјРѕС‡СѓРІСЃС‚РІРёРµ Рё СЃРѕРЅ.',level:'high',causes:['РҐСЂРѕРЅРёС‡РµСЃРєР°СЏ С‚СЂРµРІРѕРіР° Р±РµР· РїРѕРјРѕС‰Рё СѓСЃРёР»РёРІР°РµС‚СЃСЏ'],solutions:['8-800-2000-122','РўРµС…РЅРёРєРё РґС‹С…Р°РЅРёСЏ Рё Р·Р°Р·РµРјР»РµРЅРёСЏ РїРѕРјРѕРіСѓС‚ РїСЂСЏРјРѕ СЃРµР№С‡Р°СЃ']};
+    }
+  },
+  chen:{
+    name:'РРЅС‚РµСЂРЅРµС‚-Р·Р°РІРёСЃРёРјРѕСЃС‚СЊ (РЁРєР°Р»Р° Р§РµРЅР°)',
+    desc:'РћС†РµРЅРё РїСЂРёРјРµРЅРёС‚РµР»СЊРЅРѕ Рє СЃРІРѕРµРјСѓ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёСЋ РёРЅС‚РµСЂРЅРµС‚Р° Рё СЃРѕС†СЃРµС‚РµР№',
+    questions:[
+      {q:'РЇ С‡СѓРІСЃС‚РІСѓСЋ СЃРµР±СЏ С…РѕСЂРѕС€Рѕ С‚РѕР»СЊРєРѕ РєРѕРіРґР° РЅР°С…РѕР¶СѓСЃСЊ РІ РёРЅС‚РµСЂРЅРµС‚Рµ',opts:['РЎРѕРІСЃРµРј РЅРµС‚','Р РµРґРєРѕ','РРЅРѕРіРґР°','Р§Р°СЃС‚Рѕ']},
+      {q:'РЇ С‚СЂР°С‡Сѓ РІ РёРЅС‚РµСЂРЅРµС‚Рµ Р±РѕР»СЊС€Рµ РІСЂРµРјРµРЅРё С‡РµРј РїР»Р°РЅРёСЂРѕРІР°Р»',opts:['РЎРѕРІСЃРµРј РЅРµС‚','Р РµРґРєРѕ','РРЅРѕРіРґР°','Р§Р°СЃС‚Рѕ']},
+      {q:'РЇ РїС‹С‚Р°Р»СЃСЏ РїСЂРѕРІРѕРґРёС‚СЊ РјРµРЅСЊС€Рµ РІСЂРµРјРµРЅРё РѕРЅР»Р°Р№РЅ вЂ” РЅРѕ РЅРµ РїРѕР»СѓС‡Р°Р»РѕСЃСЊ',opts:['РЎРѕРІСЃРµРј РЅРµС‚','Р РµРґРєРѕ','РРЅРѕРіРґР°','Р§Р°СЃС‚Рѕ']},
+      {q:'РљРѕРіРґР° СЏ РЅРµ РІ РёРЅС‚РµСЂРЅРµС‚Рµ вЂ” СЏ РґСѓРјР°СЋ Рѕ С‚РѕРј С‡С‚РѕР±С‹ РІРѕР№С‚Рё С‚СѓРґР°',opts:['РЎРѕРІСЃРµРј РЅРµС‚','Р РµРґРєРѕ','РРЅРѕРіРґР°','Р§Р°СЃС‚Рѕ']},
+      {q:'РР·-Р·Р° РёРЅС‚РµСЂРЅРµС‚Р° СЏ СЃС‚Р°Р» С…СѓР¶Рµ СѓС‡РёС‚СЊСЃСЏ',opts:['РЎРѕРІСЃРµРј РЅРµС‚','Р РµРґРєРѕ','РРЅРѕРіРґР°','Р§Р°СЃС‚Рѕ']},
+      {q:'РЇ С‡СѓРІСЃС‚РІСѓСЋ СЂР°Р·РґСЂР°Р¶РµРЅРёРµ РєРѕРіРґР° РЅРµ РјРѕРіСѓ РІС‹Р№С‚Рё РІ РёРЅС‚РµСЂРЅРµС‚',opts:['РЎРѕРІСЃРµРј РЅРµС‚','Р РµРґРєРѕ','РРЅРѕРіРґР°','Р§Р°СЃС‚Рѕ']},
+      {q:'РРЅС‚РµСЂРЅРµС‚ РјРµС€Р°РµС‚ РјРЅРµ РѕР±С‰Р°С‚СЊСЃСЏ СЃ Р»СЋРґСЊРјРё РІ СЂРµР°Р»СЊРЅРѕР№ Р¶РёР·РЅРё',opts:['РЎРѕРІСЃРµРј РЅРµС‚','Р РµРґРєРѕ','РРЅРѕРіРґР°','Р§Р°СЃС‚Рѕ']},
+      {q:'РЇ РёСЃРїРѕР»СЊР·СѓСЋ РёРЅС‚РµСЂРЅРµС‚ С‡С‚РѕР±С‹ СѓР№С‚Рё РѕС‚ РїСЂРѕР±Р»РµРј РёР»Рё РїР»РѕС…РѕРіРѕ РЅР°СЃС‚СЂРѕРµРЅРёСЏ',opts:['РЎРѕРІСЃРµРј РЅРµС‚','Р РµРґРєРѕ','РРЅРѕРіРґР°','Р§Р°СЃС‚Рѕ']},
+      {q:'РЇ СЃРєСЂС‹РІР°СЋ РѕС‚ Р±Р»РёР·РєРёС… СЃРєРѕР»СЊРєРѕ РІСЂРµРјРµРЅРё РїСЂРѕРІРѕР¶Сѓ РѕРЅР»Р°Р№РЅ',opts:['РЎРѕРІСЃРµРј РЅРµС‚','Р РµРґРєРѕ','РРЅРѕРіРґР°','Р§Р°СЃС‚Рѕ']},
+      {q:'РЇ РґСѓРјР°СЋ РѕР± РёРЅС‚РµСЂРЅРµС‚Рµ РґР°Р¶Рµ РєРѕРіРґР° Р·Р°РЅРёРјР°СЋСЃСЊ РґСЂСѓРіРёРјРё РґРµР»Р°РјРё',opts:['РЎРѕРІСЃРµРј РЅРµС‚','Р РµРґРєРѕ','РРЅРѕРіРґР°','Р§Р°СЃС‚Рѕ']},
+      {q:'РР·-Р·Р° РёРЅС‚РµСЂРЅРµС‚Р° СЏ Р¶РµСЂС‚РІСѓСЋ СЃРЅРѕРј',opts:['РЎРѕРІСЃРµРј РЅРµС‚','Р РµРґРєРѕ','РРЅРѕРіРґР°','Р§Р°СЃС‚Рѕ']},
+      {q:'РЇ С‡СѓРІСЃС‚РІСѓСЋ С‡С‚Рѕ РёРЅС‚РµСЂРЅРµС‚ СѓРїСЂР°РІР»СЏРµС‚ РјРЅРѕР№ Р° РЅРµ СЏ РёРј',opts:['РЎРѕРІСЃРµРј РЅРµС‚','Р РµРґРєРѕ','РРЅРѕРіРґР°','Р§Р°СЃС‚Рѕ']},
+      {q:'Р‘РµР· РґРѕСЃС‚СѓРїР° РІ РёРЅС‚РµСЂРЅРµС‚ СЏ С‡СѓРІСЃС‚РІСѓСЋ РїСѓСЃС‚РѕС‚Сѓ',opts:['РЎРѕРІСЃРµРј РЅРµС‚','Р РµРґРєРѕ','РРЅРѕРіРґР°','Р§Р°СЃС‚Рѕ']},
+      {q:'РЇ С‚РµСЂСЏСЋ СЃС‡С‘С‚ РІСЂРµРјРµРЅРё РєРѕРіРґР° РЅР°С…РѕР¶СѓСЃСЊ РѕРЅР»Р°Р№РЅ',opts:['РЎРѕРІСЃРµРј РЅРµС‚','Р РµРґРєРѕ','РРЅРѕРіРґР°','Р§Р°СЃС‚Рѕ']},
+      {q:'РРЅС‚РµСЂРЅРµС‚ вЂ” РїРµСЂРІРѕРµ С‡С‚Рѕ СЏ РґРµР»Р°СЋ СѓС‚СЂРѕРј Рё РїРѕСЃР»РµРґРЅРµРµ РЅРѕС‡СЊСЋ',opts:['РЎРѕРІСЃРµРј РЅРµС‚','Р РµРґРєРѕ','РРЅРѕРіРґР°','Р§Р°СЃС‚Рѕ']},
+    ],
+    score:(s)=>{
+      if(s<=20)return{emoji:'рџ“µ',title:'РќРѕСЂРјР°Р»СЊРЅРѕРµ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёРµ',text:'РџСЂРёР·РЅР°РєРѕРІ РёРЅС‚РµСЂРЅРµС‚-Р·Р°РІРёСЃРёРјРѕСЃС‚Рё РЅРµС‚.',level:'low',causes:[],solutions:['РџСЂРѕРґРѕР»Р¶Р°Р№ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ РёРЅС‚РµСЂРЅРµС‚ РѕСЃРѕР·РЅР°РЅРЅРѕ']};
+      if(s<=32)return{emoji:'рџ“±',title:'РЎРєР»РѕРЅРЅРѕСЃС‚СЊ Рє Р·Р°РІРёСЃРёРјРѕСЃС‚Рё',text:'Р•СЃС‚СЊ РїСЂРёР·РЅР°РєРё РїСЂРѕР±Р»РµРјРЅРѕРіРѕ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёСЏ РёРЅС‚РµСЂРЅРµС‚Р°.',level:'mid',causes:['РђР»РіРѕСЂРёС‚РјС‹ СЃРѕС†СЃРµС‚РµР№ СЃРїРµС†РёР°Р»СЊРЅРѕ СЃРѕР·РґР°РЅС‹ С‡С‚РѕР±С‹ СѓРґРµСЂР¶РёРІР°С‚СЊ'],solutions:['РЈСЃС‚Р°РЅРѕРІРё Р»РёРјРёС‚С‹ РІ РЅР°СЃС‚СЂРѕР№РєР°С… С‚РµР»РµС„РѕРЅР°','РўРµР»РµС„РѕРЅ РІРЅРµ СЃРїР°Р»СЊРЅРё вЂ” СѓР»СѓС‡С€Р°РµС‚ СЃРѕРЅ']};
+      return{emoji:'рџµ',title:'РРЅС‚РµСЂРЅРµС‚-Р·Р°РІРёСЃРёРјРѕСЃС‚СЊ',text:'Р’С‹СЏРІР»РµРЅС‹ РїСЂРёР·РЅР°РєРё РІС‹СЂР°Р¶РµРЅРЅРѕР№ РёРЅС‚РµСЂРЅРµС‚-Р·Р°РІРёСЃРёРјРѕСЃС‚Рё.',level:'high',causes:['Р­С‚Рѕ РЅРµ СЃР»Р°Р±РѕСЃС‚СЊ вЂ” СЌС‚Рѕ Р±РѕСЂСЊР±Р° СЃ РїСЂРѕС„РµСЃСЃРёРѕРЅР°Р»СЊРЅРѕ СЃРѕР·РґР°РЅРЅРѕР№ Р»РѕРІСѓС€РєРѕР№'],solutions:['РџРѕСЃРјРѕС‚СЂРё СЃРєРѕР»СЊРєРѕ С‡Р°СЃРѕРІ СЂРµР°Р»СЊРЅРѕ СѓС…РѕРґРёС‚ РІ Screen Time','РџРѕРіРѕРІРѕСЂРё СЃ РєРµРј-С‚Рѕ РѕР± СЌС‚РѕРј']};
+    }
+  },
+  phq9:{
+    name:'PHQ-9',
+    desc:'Р—Р° РїРѕСЃР»РµРґРЅРёРµ 2 РЅРµРґРµР»Рё РєР°Рє С‡Р°СЃС‚Рѕ С‚РµР±СЏ Р±РµСЃРїРѕРєРѕРёР»Рё СЌС‚Рё СЃРѕСЃС‚РѕСЏРЅРёСЏ?',
+    questions:[
+      {q:'РњР°Р»С‹Р№ РёРЅС‚РµСЂРµСЃ РёР»Рё РѕС‚СЃСѓС‚СЃС‚РІРёРµ СѓРґРѕРІРѕР»СЊСЃС‚РІРёСЏ РѕС‚ РґРµР»',opts:['РЎРѕРІСЃРµРј РЅРµС‚','РќРµСЃРєРѕР»СЊРєРѕ РґРЅРµР№','Р‘РѕР»СЊС€Рµ РїРѕР»РѕРІРёРЅС‹ РґРЅРµР№','РџРѕС‡С‚Рё РєР°Р¶РґС‹Р№ РґРµРЅСЊ']},
+      {q:'РџРѕРЅРёР¶РµРЅРЅРѕРµ РЅР°СЃС‚СЂРѕРµРЅРёРµ, РїРѕРґР°РІР»РµРЅРЅРѕСЃС‚СЊ РёР»Рё Р±РµР·РЅР°РґРµР¶РЅРѕСЃС‚СЊ',opts:['РЎРѕРІСЃРµРј РЅРµС‚','РќРµСЃРєРѕР»СЊРєРѕ РґРЅРµР№','Р‘РѕР»СЊС€Рµ РїРѕР»РѕРІРёРЅС‹ РґРЅРµР№','РџРѕС‡С‚Рё РєР°Р¶РґС‹Р№ РґРµРЅСЊ']},
+      {q:'РџСЂРѕР±Р»РµРјС‹ СЃРѕ СЃРЅРѕРј (С‚СЂСѓРґРЅРѕ Р·Р°СЃРЅСѓС‚СЊ / СЃР»РёС€РєРѕРј РјРЅРѕРіРѕ СЃРїР»СЋ)',opts:['РЎРѕРІСЃРµРј РЅРµС‚','РќРµСЃРєРѕР»СЊРєРѕ РґРЅРµР№','Р‘РѕР»СЊС€Рµ РїРѕР»РѕРІРёРЅС‹ РґРЅРµР№','РџРѕС‡С‚Рё РєР°Р¶РґС‹Р№ РґРµРЅСЊ']},
+      {q:'Р§СѓРІСЃС‚РІРѕ СѓСЃС‚Р°Р»РѕСЃС‚Рё РёР»Рё РЅРµС…РІР°С‚РєРё СЌРЅРµСЂРіРёРё',opts:['РЎРѕРІСЃРµРј РЅРµС‚','РќРµСЃРєРѕР»СЊРєРѕ РґРЅРµР№','Р‘РѕР»СЊС€Рµ РїРѕР»РѕРІРёРЅС‹ РґРЅРµР№','РџРѕС‡С‚Рё РєР°Р¶РґС‹Р№ РґРµРЅСЊ']},
+      {q:'РџР»РѕС…РѕР№ Р°РїРїРµС‚РёС‚ РёР»Рё РїРµСЂРµРµРґР°РЅРёРµ',opts:['РЎРѕРІСЃРµРј РЅРµС‚','РќРµСЃРєРѕР»СЊРєРѕ РґРЅРµР№','Р‘РѕР»СЊС€Рµ РїРѕР»РѕРІРёРЅС‹ РґРЅРµР№','РџРѕС‡С‚Рё РєР°Р¶РґС‹Р№ РґРµРЅСЊ']},
+      {q:'РќРµРіР°С‚РёРІРЅС‹Рµ РјС‹СЃР»Рё Рѕ СЃРµР±Рµ, С‡СѓРІСЃС‚РІРѕ РІРёРЅС‹ РёР»Рё РЅРµСѓРґР°С‡Рё',opts:['РЎРѕРІСЃРµРј РЅРµС‚','РќРµСЃРєРѕР»СЊРєРѕ РґРЅРµР№','Р‘РѕР»СЊС€Рµ РїРѕР»РѕРІРёРЅС‹ РґРЅРµР№','РџРѕС‡С‚Рё РєР°Р¶РґС‹Р№ РґРµРЅСЊ']},
+      {q:'РўСЂСѓРґРЅРѕ СЃРѕСЃСЂРµРґРѕС‚РѕС‡РёС‚СЊСЃСЏ РЅР° С‡С‚РµРЅРёРё, СѓС‡РµР±Рµ РёР»Рё Р·Р°РґР°С‡Р°С…',opts:['РЎРѕРІСЃРµРј РЅРµС‚','РќРµСЃРєРѕР»СЊРєРѕ РґРЅРµР№','Р‘РѕР»СЊС€Рµ РїРѕР»РѕРІРёРЅС‹ РґРЅРµР№','РџРѕС‡С‚Рё РєР°Р¶РґС‹Р№ РґРµРЅСЊ']},
+      {q:'Р”РІРёРіР°С‚РµР»СЊРЅР°СЏ Р·Р°С‚РѕСЂРјРѕР¶РµРЅРЅРѕСЃС‚СЊ РёР»Рё СЃРёР»СЊРЅР°СЏ СЃСѓРµС‚Р»РёРІРѕСЃС‚СЊ',opts:['РЎРѕРІСЃРµРј РЅРµС‚','РќРµСЃРєРѕР»СЊРєРѕ РґРЅРµР№','Р‘РѕР»СЊС€Рµ РїРѕР»РѕРІРёРЅС‹ РґРЅРµР№','РџРѕС‡С‚Рё РєР°Р¶РґС‹Р№ РґРµРЅСЊ']},
+      {q:'РњС‹СЃР»Рё, С‡С‚Рѕ Р»СѓС‡С€Рµ Р±С‹ С‚РµР±СЏ РЅРµ Р±С‹Р»Рѕ, РёР»Рё Рѕ РїСЂРёС‡РёРЅРµРЅРёРё РІСЂРµРґР° СЃРµР±Рµ',opts:['РЎРѕРІСЃРµРј РЅРµС‚','РќРµСЃРєРѕР»СЊРєРѕ РґРЅРµР№','Р‘РѕР»СЊС€Рµ РїРѕР»РѕРІРёРЅС‹ РґРЅРµР№','РџРѕС‡С‚Рё РєР°Р¶РґС‹Р№ РґРµРЅСЊ']},
+    ],
+    score:(s)=>{
+      if(s<=4)return{emoji:'рџ™‚',title:'РњРёРЅРёРјР°Р»СЊРЅР°СЏ СЃРёРјРїС‚РѕРјР°С‚РёРєР° (PHQ-9)',text:'Р’С‹СЂР°Р¶РµРЅРЅС‹С… СЃРёРјРїС‚РѕРјРѕРІ РЅРµ РІС‹СЏРІР»РµРЅРѕ.',level:'low',causes:[],solutions:['РџСЂРѕРґРѕР»Р¶Р°Р№ РЅР°Р±Р»СЋРґР°С‚СЊ Р·Р° СЃРІРѕРёРј СЃРѕСЃС‚РѕСЏРЅРёРµРј Рё СЂРµР¶РёРјРѕРј СЃРЅР°.']};
+      if(s<=9)return{emoji:'рџ•',title:'Р›РµРіРєР°СЏ СЃРёРјРїС‚РѕРјР°С‚РёРєР° (PHQ-9)',text:'Р•СЃС‚СЊ РїСЂРёР·РЅР°РєРё СЌРјРѕС†РёРѕРЅР°Р»СЊРЅРѕР№ РїРµСЂРµРіСЂСѓР·РєРё.',level:'mid',causes:['РќР°РєРѕРїР»РµРЅРЅС‹Р№ СЃС‚СЂРµСЃСЃ РјРѕР¶РµС‚ РґР°РІР°С‚СЊ СѓСЃС‚РѕР№С‡РёРІС‹Р№ СѓРїР°РґРѕРє СЃРёР».'],solutions:['РџРѕРґРґРµСЂР¶РєР° РѕРєСЂСѓР¶РµРЅРёСЏ Рё Р±Р°Р·РѕРІС‹Р№ СЂРµР¶РёРј РјРѕРіСѓС‚ Р·Р°РјРµС‚РЅРѕ РїРѕРјРѕС‡СЊ.']};
+      if(s<=14)return{emoji:'рџџ',title:'РЈРјРµСЂРµРЅРЅР°СЏ СЃРёРјРїС‚РѕРјР°С‚РёРєР° (PHQ-9)',text:'РЎРёРіРЅР°Р» Р·РЅР°С‡РёРјС‹Р№, Р»СѓС‡С€Рµ РЅРµ РѕСЃС‚Р°РІР°С‚СЊСЃСЏ СЃ СЌС‚РёРј РІ РѕРґРёРЅРѕС‡РєСѓ.',level:'high',causes:['РЎРѕСЃС‚РѕСЏРЅРёРµ РјРѕР¶РµС‚ РјРµС€Р°С‚СЊ СѓС‡РµР±Рµ Рё РІРѕСЃСЃС‚Р°РЅРѕРІР»РµРЅРёСЋ.'],solutions:['Р РµРєРѕРјРµРЅРґСѓРµС‚СЃСЏ РѕР±СЃСѓРґРёС‚СЊ СЂРµР·СѓР»СЊС‚Р°С‚ СЃРѕ СЃРїРµС†РёР°Р»РёСЃС‚РѕРј РёР»Рё РґРѕРІРµСЂРµРЅРЅС‹Рј РІР·СЂРѕСЃР»С‹Рј.']};
+      if(s<=19)return{emoji:'рџ†',title:'Р’С‹СЂР°Р¶РµРЅРЅР°СЏ СЃРёРјРїС‚РѕРјР°С‚РёРєР° (PHQ-9)',text:'РќСѓР¶РЅР° РїРѕРґРґРµСЂР¶РєР° Рё Р¶РµР»Р°С‚РµР»СЊРЅРѕ РєРѕРЅС‚Р°РєС‚ СЃРѕ СЃРїРµС†РёР°Р»РёСЃС‚РѕРј РІ Р±Р»РёР¶Р°Р№С€РµРµ РІСЂРµРјСЏ.',level:'urgent',causes:['РЎРёР»СЊРЅС‹Рµ СЃРёРјРїС‚РѕРјС‹ С‚СЂРµР±СѓСЋС‚ Р±РѕР»РµРµ РІРЅРёРјР°С‚РµР»СЊРЅРѕРіРѕ СЃРѕРїСЂРѕРІРѕР¶РґРµРЅРёСЏ.'],solutions:['РћР±СЂР°С‚РёСЃСЊ РЅР° Р»РёРЅРёСЋ РїРѕРјРѕС‰Рё Рё Рє СЃРїРµС†РёР°Р»РёСЃС‚Сѓ.']};
+      return{emoji:'рџ†',title:'РўСЏР¶РµР»Р°СЏ СЃРёРјРїС‚РѕРјР°С‚РёРєР° (PHQ-9)',text:'РќРµ РѕС‚РєР»Р°РґС‹РІР°Р№ РїРѕРјРѕС‰СЊ. Р­С‚Рѕ СЃРѕСЃС‚РѕСЏРЅРёРµ Р»РµС‡РёС‚СЃСЏ, Рё РїРѕРґРґРµСЂР¶РєР° РґРѕСЃС‚СѓРїРЅР°.',level:'urgent',causes:['Р’С‹СЃРѕРєРёР№ СѓСЂРѕРІРµРЅСЊ СЃРёРјРїС‚РѕРјРѕРІ вЂ” РїРѕРІРѕРґ РґРµР№СЃС‚РІРѕРІР°С‚СЊ СЃСЂР°Р·Сѓ.'],solutions:['РСЃРїРѕР»СЊР·СѓР№ СЌРєСЃС‚СЂРµРЅРЅС‹Рµ РєРѕРЅС‚Р°РєС‚С‹ Рё РѕР±СЂР°С‚РёСЃСЊ Рє СЃРїРµС†РёР°Р»РёСЃС‚Сѓ.']};
+    }
+  },
+  gad7:{
+    name:'GAD-7',
+    desc:'Р—Р° РїРѕСЃР»РµРґРЅРёРµ 2 РЅРµРґРµР»Рё РєР°Рє С‡Р°СЃС‚Рѕ С‚РµР±СЏ Р±РµСЃРїРѕРєРѕРёР»Рё СЃР»РµРґСѓСЋС‰РёРµ СЃРёРјРїС‚РѕРјС‹ С‚СЂРµРІРѕРіРё?',
+    questions:[
+      {q:'РќРµСЂРІРѕР·РЅРѕСЃС‚СЊ, С‚СЂРµРІРѕР¶РЅРѕСЃС‚СЊ РёР»Рё РѕС‰СѓС‰РµРЅРёРµ вЂњРЅР° РїСЂРµРґРµР»РµвЂќ',opts:['РЎРѕРІСЃРµРј РЅРµС‚','РќРµСЃРєРѕР»СЊРєРѕ РґРЅРµР№','Р‘РѕР»СЊС€Рµ РїРѕР»РѕРІРёРЅС‹ РґРЅРµР№','РџРѕС‡С‚Рё РєР°Р¶РґС‹Р№ РґРµРЅСЊ']},
+      {q:'РќРµСЃРїРѕСЃРѕР±РЅРѕСЃС‚СЊ РѕСЃС‚Р°РЅРѕРІРёС‚СЊ РёР»Рё РєРѕРЅС‚СЂРѕР»РёСЂРѕРІР°С‚СЊ С‚СЂРµРІРѕРіСѓ',opts:['РЎРѕРІСЃРµРј РЅРµС‚','РќРµСЃРєРѕР»СЊРєРѕ РґРЅРµР№','Р‘РѕР»СЊС€Рµ РїРѕР»РѕРІРёРЅС‹ РґРЅРµР№','РџРѕС‡С‚Рё РєР°Р¶РґС‹Р№ РґРµРЅСЊ']},
+      {q:'Р§СЂРµР·РјРµСЂРЅРѕРµ Р±РµСЃРїРѕРєРѕР№СЃС‚РІРѕ РїРѕ СЂР°Р·РЅС‹Рј РїРѕРІРѕРґР°Рј',opts:['РЎРѕРІСЃРµРј РЅРµС‚','РќРµСЃРєРѕР»СЊРєРѕ РґРЅРµР№','Р‘РѕР»СЊС€Рµ РїРѕР»РѕРІРёРЅС‹ РґРЅРµР№','РџРѕС‡С‚Рё РєР°Р¶РґС‹Р№ РґРµРЅСЊ']},
+      {q:'РўСЂСѓРґРЅРѕ СЂР°СЃСЃР»Р°Р±РёС‚СЊСЃСЏ',opts:['РЎРѕРІСЃРµРј РЅРµС‚','РќРµСЃРєРѕР»СЊРєРѕ РґРЅРµР№','Р‘РѕР»СЊС€Рµ РїРѕР»РѕРІРёРЅС‹ РґРЅРµР№','РџРѕС‡С‚Рё РєР°Р¶РґС‹Р№ РґРµРЅСЊ']},
+      {q:'РЎРёР»СЊРЅР°СЏ СЃСѓРµС‚Р»РёРІРѕСЃС‚СЊ, С‚СЂСѓРґРЅРѕ СѓСЃРёРґРµС‚СЊ РЅР° РјРµСЃС‚Рµ',opts:['РЎРѕРІСЃРµРј РЅРµС‚','РќРµСЃРєРѕР»СЊРєРѕ РґРЅРµР№','Р‘РѕР»СЊС€Рµ РїРѕР»РѕРІРёРЅС‹ РґРЅРµР№','РџРѕС‡С‚Рё РєР°Р¶РґС‹Р№ РґРµРЅСЊ']},
+      {q:'Р Р°Р·РґСЂР°Р¶РёС‚РµР»СЊРЅРѕСЃС‚СЊ',opts:['РЎРѕРІСЃРµРј РЅРµС‚','РќРµСЃРєРѕР»СЊРєРѕ РґРЅРµР№','Р‘РѕР»СЊС€Рµ РїРѕР»РѕРІРёРЅС‹ РґРЅРµР№','РџРѕС‡С‚Рё РєР°Р¶РґС‹Р№ РґРµРЅСЊ']},
+      {q:'РћС‰СѓС‰РµРЅРёРµ, С‡С‚Рѕ РјРѕР¶РµС‚ СЃР»СѓС‡РёС‚СЊСЃСЏ С‡С‚Рѕ-С‚Рѕ СѓР¶Р°СЃРЅРѕРµ',opts:['РЎРѕРІСЃРµРј РЅРµС‚','РќРµСЃРєРѕР»СЊРєРѕ РґРЅРµР№','Р‘РѕР»СЊС€Рµ РїРѕР»РѕРІРёРЅС‹ РґРЅРµР№','РџРѕС‡С‚Рё РєР°Р¶РґС‹Р№ РґРµРЅСЊ']},
+    ],
+    score:(s)=>{
+      if(s<=4)return{emoji:'рџ™‚',title:'РќРёР·РєР°СЏ С‚СЂРµРІРѕР¶РЅРѕСЃС‚СЊ (GAD-7)',text:'РЈСЂРѕРІРµРЅСЊ С‚СЂРµРІРѕРіРё РІ РїСЂРµРґРµР»Р°С… РЅРѕСЂРјС‹.',level:'low',causes:[],solutions:['РЎРѕС…СЂР°РЅСЏР№ СЂРµР¶РёРј СЃРЅР° Рё РЅР°РіСЂСѓР·РєСѓ Р±РµР· РїРµСЂРµРіСЂСѓР·Р°.']};
+      if(s<=9)return{emoji:'рџ•',title:'Р›РµРіРєР°СЏ С‚СЂРµРІРѕР¶РЅРѕСЃС‚СЊ (GAD-7)',text:'Р•СЃС‚СЊ СѓРјРµСЂРµРЅРЅС‹Рµ С‚СЂРµРІРѕР¶РЅС‹Рµ СЃРёРјРїС‚РѕРјС‹.',level:'mid',causes:['Р”Р»РёС‚РµР»СЊРЅР°СЏ РЅР°РіСЂСѓР·РєР° СѓСЃРёР»РёРІР°РµС‚ РѕС‰СѓС‰РµРЅРёРµ С‚СЂРµРІРѕРіРё.'],solutions:['Р РµРіСѓР»СЏСЂРЅС‹Рµ РєРѕСЂРѕС‚РєРёРµ РїСЂР°РєС‚РёРєРё РґС‹С…Р°РЅРёСЏ Рё РїР°СѓР·С‹ РїРѕРјРѕРіР°СЋС‚ СЃС‚Р°Р±РёР»РёР·РёСЂРѕРІР°С‚СЊСЃСЏ.']};
+      if(s<=14)return{emoji:'рџџ',title:'РЈРјРµСЂРµРЅРЅР°СЏ С‚СЂРµРІРѕР¶РЅРѕСЃС‚СЊ (GAD-7)',text:'РЎРёРјРїС‚РѕРјС‹ Р·Р°РјРµС‚РЅРѕ РІР»РёСЏСЋС‚ РЅР° СЃР°РјРѕС‡СѓРІСЃС‚РІРёРµ.',level:'high',causes:['РџСЂРё РїРѕСЃС‚РѕСЏРЅРЅРѕР№ С‚СЂРµРІРѕРіРµ РёСЃС‚РѕС‰Р°СЋС‚СЃСЏ РІРЅРёРјР°РЅРёРµ Рё СЃРѕРЅ.'],solutions:['Р РµРєРѕРјРµРЅРґСѓРµС‚СЃСЏ РѕР±СЃСѓРґРёС‚СЊ СЃРѕСЃС‚РѕСЏРЅРёРµ СЃРѕ СЃРїРµС†РёР°Р»РёСЃС‚РѕРј.']};
+      return{emoji:'рџ†',title:'Р’С‹СЃРѕРєР°СЏ С‚СЂРµРІРѕР¶РЅРѕСЃС‚СЊ (GAD-7)',text:'РќСѓР¶РЅР° Р±РѕР»РµРµ РёРЅС‚РµРЅСЃРёРІРЅР°СЏ РїРѕРґРґРµСЂР¶РєР° Рё РєРѕРЅС‚Р°РєС‚ СЃРѕ СЃРїРµС†РёР°Р»РёСЃС‚РѕРј.',level:'urgent',causes:['Р’С‹СЃРѕРєР°СЏ РІС‹СЂР°Р¶РµРЅРЅРѕСЃС‚СЊ С‚СЂРµРІРѕРіРё С‚СЂРµР±СѓРµС‚ РІРЅРёРјР°РЅРёСЏ СЃРµР№С‡Р°СЃ.'],solutions:['РСЃРїРѕР»СЊР·СѓР№ РєРѕРЅС‚Р°РєС‚С‹ РїРѕРјРѕС‰Рё Рё РѕР±СЂР°С‚РёСЃСЊ Рє СЃРїРµС†РёР°Р»РёСЃС‚Сѓ.']};
+    }
+  },
+  rses:{
+    name:'RSES (Р РѕР·РµРЅР±РµСЂРі)',
+    desc:'РћС‚РјРµС‚СЊ, РЅР°СЃРєРѕР»СЊРєРѕ РєР°Р¶РґРѕРµ СѓС‚РІРµСЂР¶РґРµРЅРёРµ РѕС‚РЅРѕСЃРёС‚СЃСЏ Рє С‚РµР±Рµ.',
+    questions:[
+      {q:'РЇ С‡СѓРІСЃС‚РІСѓСЋ, С‡С‚Рѕ СЏ С‡РµР»РѕРІРµРє РґРѕСЃС‚РѕР№РЅС‹Р№, РЅРµ С…СѓР¶Рµ РґСЂСѓРіРёС….',opts:['РџРѕР»РЅРѕСЃС‚СЊСЋ СЃРѕРіР»Р°СЃРµРЅ','РЎРєРѕСЂРµРµ СЃРѕРіР»Р°СЃРµРЅ','РЎРєРѕСЂРµРµ РЅРµ СЃРѕРіР»Р°СЃРµРЅ','РџРѕР»РЅРѕСЃС‚СЊСЋ РЅРµ СЃРѕРіР»Р°СЃРµРЅ'],values:[3,2,1,0]},
+      {q:'РЈ РјРµРЅСЏ РµСЃС‚СЊ СЂСЏРґ С…РѕСЂРѕС€РёС… РєР°С‡РµСЃС‚РІ.',opts:['РџРѕР»РЅРѕСЃС‚СЊСЋ СЃРѕРіР»Р°СЃРµРЅ','РЎРєРѕСЂРµРµ СЃРѕРіР»Р°СЃРµРЅ','РЎРєРѕСЂРµРµ РЅРµ СЃРѕРіР»Р°СЃРµРЅ','РџРѕР»РЅРѕСЃС‚СЊСЋ РЅРµ СЃРѕРіР»Р°СЃРµРЅ'],values:[3,2,1,0]},
+      {q:'РЇ СЃРєР»РѕРЅРµРЅ РґСѓРјР°С‚СЊ, С‡С‚Рѕ СЏ РЅРµСѓРґР°С‡РЅРёРє.',opts:['РџРѕР»РЅРѕСЃС‚СЊСЋ СЃРѕРіР»Р°СЃРµРЅ','РЎРєРѕСЂРµРµ СЃРѕРіР»Р°СЃРµРЅ','РЎРєРѕСЂРµРµ РЅРµ СЃРѕРіР»Р°СЃРµРЅ','РџРѕР»РЅРѕСЃС‚СЊСЋ РЅРµ СЃРѕРіР»Р°СЃРµРЅ'],values:[0,1,2,3]},
+      {q:'РЇ СЃРїРѕСЃРѕР±РµРЅ РґРµР»Р°С‚СЊ РґРµР»Р° РЅРµ С…СѓР¶Рµ Р±РѕР»СЊС€РёРЅСЃС‚РІР° Р»СЋРґРµР№.',opts:['РџРѕР»РЅРѕСЃС‚СЊСЋ СЃРѕРіР»Р°СЃРµРЅ','РЎРєРѕСЂРµРµ СЃРѕРіР»Р°СЃРµРЅ','РЎРєРѕСЂРµРµ РЅРµ СЃРѕРіР»Р°СЃРµРЅ','РџРѕР»РЅРѕСЃС‚СЊСЋ РЅРµ СЃРѕРіР»Р°СЃРµРЅ'],values:[3,2,1,0]},
+      {q:'РњРЅРµ РєР°Р¶РµС‚СЃСЏ, С‡С‚Рѕ РјРЅРµ РЅРµС‡РµРј РіРѕСЂРґРёС‚СЊСЃСЏ.',opts:['РџРѕР»РЅРѕСЃС‚СЊСЋ СЃРѕРіР»Р°СЃРµРЅ','РЎРєРѕСЂРµРµ СЃРѕРіР»Р°СЃРµРЅ','РЎРєРѕСЂРµРµ РЅРµ СЃРѕРіР»Р°СЃРµРЅ','РџРѕР»РЅРѕСЃС‚СЊСЋ РЅРµ СЃРѕРіР»Р°СЃРµРЅ'],values:[0,1,2,3]},
+      {q:'РЇ С…РѕСЂРѕС€Рѕ Рє СЃРµР±Рµ РѕС‚РЅРѕС€СѓСЃСЊ.',opts:['РџРѕР»РЅРѕСЃС‚СЊСЋ СЃРѕРіР»Р°СЃРµРЅ','РЎРєРѕСЂРµРµ СЃРѕРіР»Р°СЃРµРЅ','РЎРєРѕСЂРµРµ РЅРµ СЃРѕРіР»Р°СЃРµРЅ','РџРѕР»РЅРѕСЃС‚СЊСЋ РЅРµ СЃРѕРіР»Р°СЃРµРЅ'],values:[3,2,1,0]},
+      {q:'Р’ С†РµР»РѕРј СЏ РґРѕРІРѕР»РµРЅ СЃРѕР±РѕР№.',opts:['РџРѕР»РЅРѕСЃС‚СЊСЋ СЃРѕРіР»Р°СЃРµРЅ','РЎРєРѕСЂРµРµ СЃРѕРіР»Р°СЃРµРЅ','РЎРєРѕСЂРµРµ РЅРµ СЃРѕРіР»Р°СЃРµРЅ','РџРѕР»РЅРѕСЃС‚СЊСЋ РЅРµ СЃРѕРіР»Р°СЃРµРЅ'],values:[3,2,1,0]},
+      {q:'РЇ С…РѕС‚РµР» Р±С‹ РѕС‚РЅРѕСЃРёС‚СЊСЃСЏ Рє СЃРµР±Рµ СЃ Р±РѕР»СЊС€РёРј СѓРІР°Р¶РµРЅРёРµРј.',opts:['РџРѕР»РЅРѕСЃС‚СЊСЋ СЃРѕРіР»Р°СЃРµРЅ','РЎРєРѕСЂРµРµ СЃРѕРіР»Р°СЃРµРЅ','РЎРєРѕСЂРµРµ РЅРµ СЃРѕРіР»Р°СЃРµРЅ','РџРѕР»РЅРѕСЃС‚СЊСЋ РЅРµ СЃРѕРіР»Р°СЃРµРЅ'],values:[0,1,2,3]},
+      {q:'РРЅРѕРіРґР° СЏ С‡СѓРІСЃС‚РІСѓСЋ СЃРµР±СЏ Р±РµСЃРїРѕР»РµР·РЅС‹Рј.',opts:['РџРѕР»РЅРѕСЃС‚СЊСЋ СЃРѕРіР»Р°СЃРµРЅ','РЎРєРѕСЂРµРµ СЃРѕРіР»Р°СЃРµРЅ','РЎРєРѕСЂРµРµ РЅРµ СЃРѕРіР»Р°СЃРµРЅ','РџРѕР»РЅРѕСЃС‚СЊСЋ РЅРµ СЃРѕРіР»Р°СЃРµРЅ'],values:[0,1,2,3]},
+      {q:'РРЅРѕРіРґР° СЏ РґСѓРјР°СЋ, С‡С‚Рѕ СЏ СЃРѕРІСЃРµРј РЅРё РЅР° С‡С‚Рѕ РЅРµ РіРѕР¶СѓСЃСЊ.',opts:['РџРѕР»РЅРѕСЃС‚СЊСЋ СЃРѕРіР»Р°СЃРµРЅ','РЎРєРѕСЂРµРµ СЃРѕРіР»Р°СЃРµРЅ','РЎРєРѕСЂРµРµ РЅРµ СЃРѕРіР»Р°СЃРµРЅ','РџРѕР»РЅРѕСЃС‚СЊСЋ РЅРµ СЃРѕРіР»Р°СЃРµРЅ'],values:[0,1,2,3]},
+    ],
+    score:(s)=>{
+      if(s<=14)return{emoji:'рџџ',title:'РќРёР·РєР°СЏ СЃР°РјРѕРѕС†РµРЅРєР° (RSES)',text:'РЎР°РјРѕРѕС†РµРЅРєР° СЃРЅРёР¶РµРЅР°, СЌС‚Рѕ РјРѕР¶РµС‚ СѓСЃРёР»РёРІР°С‚СЊ С‚СЂРµРІРѕРіСѓ Рё СѓСЃС‚Р°Р»РѕСЃС‚СЊ.',level:'high',causes:['Р–РµСЃС‚РєР°СЏ СЃР°РјРѕРєСЂРёС‚РёРєР° С‡Р°СЃС‚Рѕ РёСЃРєР°Р¶Р°РµС‚ РІРѕСЃРїСЂРёСЏС‚РёРµ СЃРІРѕРёС… РґРѕСЃС‚РёР¶РµРЅРёР№.'],solutions:['РџРѕР»РµР·РЅРѕ РѕР±СЃСѓРґРёС‚СЊ СЌС‚Рѕ СЃ РїСЃРёС…РѕР»РѕРіРѕРј Рё С‚СЂРµРЅРёСЂРѕРІР°С‚СЊ Р±РѕР»РµРµ РїРѕРґРґРµСЂР¶РёРІР°СЋС‰РёР№ РІРЅСѓС‚СЂРµРЅРЅРёР№ РґРёР°Р»РѕРі.']};
+      if(s<=25)return{emoji:'рџ™‚',title:'РЎСЂРµРґРЅСЏСЏ СЃР°РјРѕРѕС†РµРЅРєР° (RSES)',text:'РЎР°РјРѕРѕС†РµРЅРєР° РІ СЃСЂРµРґРЅРµРј РґРёР°РїР°Р·РѕРЅРµ.',level:'mid',causes:['РљРѕР»РµР±Р°РЅРёСЏ СЃР°РјРѕРѕС†РµРЅРєРё Р·Р°РІРёСЃСЏС‚ РѕС‚ РєРѕРЅС‚РµРєСЃС‚Р° Рё СЃС‚СЂРµСЃСЃР°.'],solutions:['Р¤РёРєСЃРёСЂСѓР№ СЂРµР°Р»СЊРЅС‹Рµ РґРѕСЃС‚РёР¶РµРЅРёСЏ Рё РїРѕРґРґРµСЂР¶РёРІР°СЋС‰РёРµ С„Р°РєС‚С‹ Рѕ СЃРµР±Рµ.']};
+      return{emoji:'рџЊ',title:'Р’С‹СЃРѕРєР°СЏ СЃР°РјРѕРѕС†РµРЅРєР° (RSES)',text:'РЈСЂРѕРІРµРЅСЊ СЃР°РјРѕРѕС†РµРЅРєРё СѓСЃС‚РѕР№С‡РёРІС‹Р№.',level:'low',causes:[],solutions:['РЎРѕС…СЂР°РЅСЏР№ РїСЂР°РєС‚РёРєРё, РєРѕС‚РѕСЂС‹Рµ РїРѕРґРґРµСЂР¶РёРІР°СЋС‚ СЌС‚Рѕ СЃРѕСЃС‚РѕСЏРЅРёРµ.']};
+    }
+  },
+  ucla:{
+    name:'UCLA',
+    desc:'РћС‚РјРµС‚СЊ, РєР°Рє С‡Р°СЃС‚Рѕ С‚РµР±Рµ Р·РЅР°РєРѕРјС‹ СЌС‚Рё РѕС‰СѓС‰РµРЅРёСЏ.',
+    questions:makeQuestions([
+      'РЇ С‡СѓРІСЃС‚РІСѓСЋ СЃРµР±СЏ РІ РіР°СЂРјРѕРЅРёРё СЃ Р»СЋРґСЊРјРё РІРѕРєСЂСѓРі.',
+      'РњРЅРµ РЅРµ С…РІР°С‚Р°РµС‚ РєРѕРјРїР°РЅРёРё.',
+      'РќРµС‚ РЅРёРєРѕРіРѕ, Рє РєРѕРјСѓ СЏ РјРѕРіСѓ РѕР±СЂР°С‚РёС‚СЊСЃСЏ.',
+      'РЇ С‡СѓРІСЃС‚РІСѓСЋ СЃРµР±СЏ РѕРґРёРЅРѕРєРёРј.',
+      'РЇ С‡СѓРІСЃС‚РІСѓСЋ СЃРµР±СЏ С‡Р°СЃС‚СЊСЋ РіСЂСѓРїРїС‹ РґСЂСѓР·РµР№.',
+      'РЈ РјРµРЅСЏ РµСЃС‚СЊ Р»СЋРґРё, СЃ РєРѕС‚РѕСЂС‹РјРё РјРѕР¶РЅРѕ РїРѕРіРѕРІРѕСЂРёС‚СЊ.',
+      'РњРЅРµ РєР°Р¶РµС‚СЃСЏ, С‡С‚Рѕ РјРµРЅСЏ РЅРёРєС‚Рѕ РїРѕ-РЅР°СЃС‚РѕСЏС‰РµРјСѓ РЅРµ РїРѕРЅРёРјР°РµС‚.',
+      'РњРЅРµ С‚СЂСѓРґРЅРѕ Р·Р°РІРѕРґРёС‚СЊ Р±Р»РёР·РєРёРµ РѕС‚РЅРѕС€РµРЅРёСЏ.',
+      'Р•СЃС‚СЊ Р»СЋРґРё, Рє РєРѕС‚РѕСЂС‹Рј СЏ РјРѕРіСѓ РѕР±СЂР°С‚РёС‚СЊСЃСЏ Р·Р° РїРѕРґРґРµСЂР¶РєРѕР№.',
+      'РЇ С‡СѓРІСЃС‚РІСѓСЋ СЃРµР±СЏ В«СЃРІРѕРёРјВ» СЃСЂРµРґРё РґСЂСѓРіРёС….',
+      'РЇ С‡СѓРІСЃС‚РІСѓСЋ СЃРµР±СЏ РёР·РѕР»РёСЂРѕРІР°РЅРЅС‹Рј РѕС‚ РґСЂСѓРіРёС….',
+      'РЇ С‡СѓРІСЃС‚РІСѓСЋ СЃРµР±СЏ РѕСЃС‚Р°РІР»РµРЅРЅС‹Рј.',
+      'РњРЅРµ РЅРµ С…РІР°С‚Р°РµС‚ Р±Р»РёР·РѕСЃС‚Рё РІ РѕС‚РЅРѕС€РµРЅРёСЏС….',
+      'РЇ С‡СѓРІСЃС‚РІСѓСЋ, С‡С‚Рѕ РјРѕРё РёРЅС‚РµСЂРµСЃС‹ РјР°Р»Рѕ РєС‚Рѕ СЂР°Р·РґРµР»СЏРµС‚.',
+      'Р•СЃС‚СЊ Р»СЋРґРё, СЃ РєРѕС‚РѕСЂС‹РјРё РјРЅРµ РєРѕРјС„РѕСЂС‚РЅРѕ РїСЂРѕРІРѕРґРёС‚СЊ РІСЂРµРјСЏ.',
+      'РЇ Р»РµРіРєРѕ РЅР°С…РѕР¶Сѓ РєРѕРјРїР°РЅРёСЋ, РєРѕРіРґР° С…РѕС‡Сѓ.',
+      'РЇ С‡СѓРІСЃС‚РІСѓСЋ СЃРµР±СЏ РѕС‚С‡СѓР¶РґРµРЅРЅС‹Рј.',
+      'РњРЅРµ РєР°Р¶РµС‚СЃСЏ, С‡С‚Рѕ РјРµРЅСЏ РёРіРЅРѕСЂРёСЂСѓСЋС‚.',
+      'РЇ С‡СѓРІСЃС‚РІСѓСЋ СЃРІСЏР·СЊ СЃ Р»СЋРґСЊРјРё РІРѕРєСЂСѓРі.',
+      'РЇ РёСЃРїС‹С‚С‹РІР°СЋ РіР»СѓР±РѕРєРѕРµ РѕС‰СѓС‰РµРЅРёРµ РѕРґРёРЅРѕС‡РµСЃС‚РІР°.'
+    ],OPT_FREQ4,[0,4,5,8,9,14,15,18]),
+    score:(s)=>{
+      if(s<=20)return{emoji:'рџ™‚',title:'РќРёР·РєРёР№ СѓСЂРѕРІРµРЅСЊ РѕРґРёРЅРѕС‡РµСЃС‚РІР° (UCLA)',text:'РћС‰СѓС‰РµРЅРёРµ СЃРѕС†РёР°Р»СЊРЅРѕР№ РёР·РѕР»СЏС†РёРё РІС‹СЂР°Р¶РµРЅРѕ РјРёРЅРёРјР°Р»СЊРЅРѕ.',level:'low',causes:[],solutions:['РџРѕРґРґРµСЂР¶РёРІР°Р№ СЃРІСЏР·Рё, РєРѕС‚РѕСЂС‹Рµ СѓР¶Рµ РґР°СЋС‚ С‚РµР±Рµ РѕРїРѕСЂСѓ.']};
+      if(s<=35)return{emoji:'рџ™Ѓ',title:'РЈРјРµСЂРµРЅРЅРѕРµ РѕРґРёРЅРѕС‡РµСЃС‚РІРѕ (UCLA)',text:'РРЅРѕРіРґР° РјРѕР¶РµС‚ РЅРµ С…РІР°С‚Р°С‚СЊ Р±Р»РёР·РѕСЃС‚Рё Рё РїРѕРЅРёРјР°РЅРёСЏ.',level:'mid',causes:['РќР° РѕС‰СѓС‰РµРЅРёРµ РѕРґРёРЅРѕС‡РµСЃС‚РІР° РІР»РёСЏСЋС‚ РЅР°РіСЂСѓР·РєР° Рё РЅРµРґРѕСЃС‚Р°С‚РѕРє Р±РµР·РѕРїР°СЃРЅС‹С… РєРѕРЅС‚Р°РєС‚РѕРІ.'],solutions:['РќР°С‡РЅРё СЃ РѕРґРЅРѕРіРѕ РЅР°РґРµР¶РЅРѕРіРѕ РєРѕРЅС‚Р°РєС‚Р° Рё РєРѕСЂРѕС‚РєРѕРіРѕ СЂР°Р·РіРѕРІРѕСЂР°.']};
+      if(s<=45)return{emoji:'рџ”',title:'Р’С‹СЃРѕРєРѕРµ РѕРґРёРЅРѕС‡РµСЃС‚РІРѕ (UCLA)',text:'РћРґРёРЅРѕС‡РµСЃС‚РІРѕ Р·Р°РјРµС‚РЅРѕ РІР»РёСЏРµС‚ РЅР° СЃРѕСЃС‚РѕСЏРЅРёРµ.',level:'high',causes:['Р”Р»РёС‚РµР»СЊРЅР°СЏ РёР·РѕР»СЏС†РёСЏ СѓСЃРёР»РёРІР°РµС‚ С‚СЂРµРІРѕРіСѓ Рё СѓСЃС‚Р°Р»РѕСЃС‚СЊ.'],solutions:['РџРѕРїСЂРѕР±СѓР№ РѕР±СЃСѓРґРёС‚СЊ СЃРІРѕРµ СЃРѕСЃС‚РѕСЏРЅРёРµ СЃРѕ СЃРїРµС†РёР°Р»РёСЃС‚РѕРј РёР»Рё РґРѕРІРµСЂРµРЅРЅС‹Рј РІР·СЂРѕСЃР»С‹Рј.']};
+      return{emoji:'рџ†',title:'РћС‡РµРЅСЊ РІС‹СЃРѕРєРѕРµ РѕРґРёРЅРѕС‡РµСЃС‚РІРѕ (UCLA)',text:'РЎРѕСЃС‚РѕСЏРЅРёРµ С‚СЂРµР±СѓРµС‚ РїРѕРґРґРµСЂР¶РєРё СѓР¶Рµ СЃРµР№С‡Р°СЃ.',level:'urgent',causes:['РР·РѕР»СЏС†РёСЏ РјРѕР¶РµС‚ Р±С‹СЃС‚СЂРѕ СѓСЃРёР»РёРІР°С‚СЊ РєСЂРёР·РёСЃРЅС‹Рµ РїРµСЂРµР¶РёРІР°РЅРёСЏ.'],solutions:['РќРµ РѕСЃС‚Р°РІР°Р№СЃСЏ РѕРґРёРЅ: РёСЃРїРѕР»СЊР·СѓР№ СЂР°Р·РґРµР» РїРѕРјРѕС‰Рё Рё С‚РµР»РµС„РѕРЅ РґРѕРІРµСЂРёСЏ.']};
+    }
+  },
+  mps:{
+    name:'MPS (Frost)',
+    desc:'РћС†РµРЅРё, РЅР°СЃРєРѕР»СЊРєРѕ СѓС‚РІРµСЂР¶РґРµРЅРёСЏ РїСЂРѕ РїРµСЂС„РµРєС†РёРѕРЅРёР·Рј РїСЂРѕ С‚РµР±СЏ.',
+    questions:makeQuestions([
+      'РЇ СЃС‚Р°РІР»СЋ РїРµСЂРµРґ СЃРѕР±РѕР№ РѕС‡РµРЅСЊ РІС‹СЃРѕРєРёРµ СЃС‚Р°РЅРґР°СЂС‚С‹.',
+      'РћС€РёР±РєР° РґР»СЏ РјРµРЅСЏ РїРѕС‡С‚Рё РЅРµРїСЂРёРµРјР»РµРјР°.',
+      'РЇ РґРѕР»РіРѕ РїРµСЂРµР¶РёРІР°СЋ РёР·-Р·Р° РјРµР»РєРёС… РїСЂРѕРјР°С…РѕРІ.',
+      'РњРЅРµ СЃР»РѕР¶РЅРѕ Р·Р°РєРѕРЅС‡РёС‚СЊ Р·Р°РґР°С‡Сѓ, РїРѕРєР° РІСЃРµ РЅРµ РёРґРµР°Р»СЊРЅРѕ.',
+      'Р•СЃР»Рё СЂРµР·СѓР»СЊС‚Р°С‚ РЅРµ Р»СѓС‡С€РёР№, СЏ СЃС‡РёС‚Р°СЋ СЌС‚Рѕ РїСЂРѕРІР°Р»РѕРј.',
+      'РЇ С‡Р°СЃС‚Рѕ СЃСЂР°РІРЅРёРІР°СЋ СЃРµР±СЏ СЃ Р±РѕР»РµРµ СѓСЃРїРµС€РЅС‹РјРё.',
+      'РњРЅРµ С‚СЂСѓРґРЅРѕ РѕС‚РґС‹С…Р°С‚СЊ, РµСЃР»Рё РґРµР»Р° РЅРµ СЃРґРµР»Р°РЅС‹ РёРґРµР°Р»СЊРЅРѕ.',
+      'РЇ РєСЂРёС‚РёРєСѓСЋ СЃРµР±СЏ СЃРёР»СЊРЅРµРµ, С‡РµРј РґСЂСѓРіРёС….',
+      'РЇ Р±РѕСЋСЃСЊ СЂР°Р·РѕС‡Р°СЂРѕРІР°С‚СЊ Р·РЅР°С‡РёРјС‹С… Р»СЋРґРµР№.',
+      'Р”Р°Р¶Рµ С…РѕСЂРѕС€РёР№ СЂРµР·СѓР»СЊС‚Р°С‚ РєР°Р¶РµС‚СЃСЏ РјРЅРµ РЅРµРґРѕСЃС‚Р°С‚РѕС‡РЅС‹Рј.',
+      'РЇ Р·Р°РјРµС‡Р°СЋ РІ СЂР°Р±РѕС‚Рµ РїСЂРµР¶РґРµ РІСЃРµРіРѕ РЅРµРґРѕС‡РµС‚С‹.',
+      'РњРЅРµ С‚СЂСѓРґРЅРѕ РґРµР»РµРіРёСЂРѕРІР°С‚СЊ Р·Р°РґР°С‡Рё.',
+      'РЇ РѕС‚РєР»Р°РґС‹РІР°СЋ РЅР°С‡Р°Р»Рѕ, РµСЃР»Рё Р±РѕСЋСЃСЊ СЃРґРµР»Р°С‚СЊ РЅРµРёРґРµР°Р»СЊРЅРѕ.',
+      'РЇ С‡Р°СЃС‚Рѕ С‡СѓРІСЃС‚РІСѓСЋ РІРёРЅСѓ Р·Р° СЂРµР·СѓР»СЊС‚Р°С‚ В«РЅРµ РЅР° РјР°РєСЃРёРјСѓРјВ».',
+      'РњРЅРµ РІР°Р¶РЅРѕ РїРѕР»СѓС‡Р°С‚СЊ С‚РѕР»СЊРєРѕ РІС‹СЃРѕРєРёРµ РѕС†РµРЅРєРё.',
+      'РЇ РёСЃРїС‹С‚С‹РІР°СЋ РЅР°РїСЂСЏР¶РµРЅРёРµ РїРµСЂРµРґ РїСЂРѕРІРµСЂРєРѕР№ СЂРµР·СѓР»СЊС‚Р°С‚Р°.',
+      'РЇ СЂРµРґРєРѕ Р±С‹РІР°СЋ РґРѕРІРѕР»РµРЅ СЃРІРѕРµР№ СЂР°Р±РѕС‚РѕР№.',
+      'РЇ РґСѓРјР°СЋ, С‡С‚Рѕ РґСЂСѓРіРёРµ Р¶РґСѓС‚ РѕС‚ РјРµРЅСЏ Р±РµР·РѕС€РёР±РѕС‡РЅРѕСЃС‚Рё.',
+      'Р›СЋР±Р°СЏ РєСЂРёС‚РёРєР° РІРѕСЃРїСЂРёРЅРёРјР°РµС‚СЃСЏ РѕС‡РµРЅСЊ Р±РѕР»РµР·РЅРµРЅРЅРѕ.',
+      'РЇ С‚СЂР°С‡Сѓ СЃР»РёС€РєРѕРј РјРЅРѕРіРѕ РІСЂРµРјРµРЅРё РЅР° РґРµС‚Р°Р»Рё.',
+      'РЇ Р±РѕСЋСЃСЊ РЅР°С‡РёРЅР°С‚СЊ РЅРѕРІРѕРµ РёР·-Р·Р° СЂРёСЃРєР° РѕС€РёР±РєРё.',
+      'РЇ С‡Р°СЃС‚Рѕ РїРµСЂРµРґРµР»С‹РІР°СЋ СѓР¶Рµ РіРѕС‚РѕРІРѕРµ.',
+      'РњРЅРµ С‚СЂСѓРґРЅРѕ РїСЂРёРЅСЏС‚СЊ В«РґРѕСЃС‚Р°С‚РѕС‡РЅРѕ С…РѕСЂРѕС€РёР№В» СЂРµР·СѓР»СЊС‚Р°С‚.',
+      'РЈСЃРїРµС… Р±С‹СЃС‚СЂРѕ РѕР±РµСЃС†РµРЅРёРІР°РµС‚СЃСЏ РІ РјРѕРёС… РіР»Р°Р·Р°С….',
+      'РЇ С‡Р°СЃС‚Рѕ РѕС‰СѓС‰Р°СЋ, С‡С‚Рѕ РЅРµ СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓСЋ СЃРІРѕРёРј СЃС‚Р°РЅРґР°СЂС‚Р°Рј.',
+      'РЇ СЃС‚Р°СЂР°СЋСЃСЊ РєРѕРЅС‚СЂРѕР»РёСЂРѕРІР°С‚СЊ РєР°Р¶РґСѓСЋ РјРµР»РѕС‡СЊ.',
+      'РњРЅРµ С‚СЂСѓРґРЅРѕ РїСЂРѕСЃРёС‚СЊ РїРѕРјРѕС‰СЊ.',
+      'РЇ Р±РѕСЋСЃСЊ, С‡С‚Рѕ РѕРґРЅР° РѕС€РёР±РєР° РїРµСЂРµС‡РµСЂРєРЅРµС‚ РІСЃРµ.',
+      'РЇ С‡Р°СЃС‚Рѕ РґСѓРјР°СЋ, РєР°Рє РјРѕР¶РЅРѕ Р±С‹Р»Рѕ СЃРґРµР»Р°С‚СЊ Р»СѓС‡С€Рµ.',
+      'РЇ СЂРµРґРєРѕ С…РІР°Р»СЋ СЃРµР±СЏ Р·Р° РґРѕСЃС‚РёРіРЅСѓС‚РѕРµ.',
+      'РЇ РІРѕР»РЅСѓСЋСЃСЊ, С‡С‚Рѕ РѕРєСЂСѓР¶Р°СЋС‰РёРµ Р·Р°РјРµС‚СЏС‚ РјРѕРё СЃР»Р°Р±С‹Рµ СЃС‚РѕСЂРѕРЅС‹.',
+      'РњРЅРµ СЃР»РѕР¶РЅРѕ РїРµСЂРµРєР»СЋС‡РёС‚СЊСЃСЏ РїРѕСЃР»Рµ РЅРµСѓРґР°С‡Рё.',
+      'РЇ РёР·Р±РµРіР°СЋ Р·Р°РґР°С‡, РіРґРµ РЅРµ СѓРІРµСЂРµРЅ РІ РёРґРµР°Р»СЊРЅРѕРј СЂРµР·СѓР»СЊС‚Р°С‚Рµ.',
+      'РњРѕРµ РЅР°СЃС‚СЂРѕРµРЅРёРµ СЃРёР»СЊРЅРѕ Р·Р°РІРёСЃРёС‚ РѕС‚ СЂРµР·СѓР»СЊС‚Р°С‚Р°.',
+      'РњРЅРµ С‚СЂСѓРґРЅРѕ РїСЂРёРЅСЏС‚СЊ СЃРµР±СЏ, РєРѕРіРґР° С‡С‚Рѕ-С‚Рѕ РЅРµ РїРѕР»СѓС‡Р°РµС‚СЃСЏ.'
+    ],OPT_AGREE5),
+    score:(s)=>{
+      if(s<=35)return{emoji:'рџ™‚',title:'РќРёР·РєРёР№ РїРµСЂС„РµРєС†РёРѕРЅРёР·Рј (MPS)',text:'РЎС‚Р°РЅРґР°СЂС‚С‹ СЂРµР°Р»РёСЃС‚РёС‡РЅС‹Рµ, РґР°РІР»РµРЅРёРµ РЅРµРІС‹СЃРѕРєРѕРµ.',level:'low',causes:[],solutions:['РЎРѕС…СЂР°РЅСЏР№ Р±Р°Р»Р°РЅСЃ РјРµР¶РґСѓ РєР°С‡РµСЃС‚РІРѕРј Рё РѕС‚РґС‹С…РѕРј.']};
+      if(s<=70)return{emoji:'рџ™Ѓ',title:'РЈРјРµСЂРµРЅРЅС‹Р№ РїРµСЂС„РµРєС†РёРѕРЅРёР·Рј (MPS)',text:'Р•СЃС‚СЊ СЃРєР»РѕРЅРЅРѕСЃС‚СЊ Р·Р°РІС‹С€Р°С‚СЊ РїР»Р°РЅРєСѓ Рє СЃРµР±Рµ.',level:'mid',causes:['РЁРєРѕР»СЊРЅРѕРµ РґР°РІР»РµРЅРёРµ Рё СЃСЂР°РІРЅРµРЅРёСЏ С‡Р°СЃС‚Рѕ СѓСЃРёР»РёРІР°СЋС‚ РїРµСЂС„РµРєС†РёРѕРЅРёР·Рј.'],solutions:['РџСЂРѕР±СѓР№ С„РѕСЂРјСѓР»РёСЂРѕРІР°С‚СЊ Р·Р°РґР°С‡Рё РєР°Рє В«РґРѕСЃС‚Р°С‚РѕС‡РЅРѕ С…РѕСЂРѕС€РѕВ».']};
+      if(s<=100)return{emoji:'рџџ',title:'Р’С‹СЃРѕРєРёР№ РїРµСЂС„РµРєС†РёРѕРЅРёР·Рј (MPS)',text:'Р–РµСЃС‚РєРёРµ СЃС‚Р°РЅРґР°СЂС‚С‹ Р·Р°РјРµС‚РЅРѕ РёСЃС‚РѕС‰Р°СЋС‚ СЂРµСЃСѓСЂСЃС‹.',level:'high',causes:['РЎС‚СЂР°С… РѕС€РёР±РєРё Рё СЃР°РјРѕРєСЂРёС‚РёРєР° СѓСЃРёР»РёРІР°СЋС‚ С‚СЂРµРІРѕРіСѓ Рё РїСЂРѕРєСЂР°СЃС‚РёРЅР°С†РёСЋ.'],solutions:['РџРѕР»РµР·РЅРѕ РѕР±СЃСѓРґРёС‚СЊ СЌС‚Рѕ СЃ РїСЃРёС…РѕР»РѕРіРѕРј РёР»Рё РЅР°СЃС‚Р°РІРЅРёРєРѕРј.']};
+      return{emoji:'рџ†',title:'РћС‡РµРЅСЊ РІС‹СЃРѕРєРёР№ РїРµСЂС„РµРєС†РёРѕРЅРёР·Рј (MPS)',text:'Р”Р°РІР»РµРЅРёРµ СЃС‚Р°РЅРґР°СЂС‚РѕРІ РјРѕР¶РµС‚ Р±С‹С‚СЊ РєСЂРёР·РёСЃРЅС‹Рј.',level:'urgent',causes:['РЎРѕС‡РµС‚Р°РЅРёРµ СЃР°РјРѕРєСЂРёС‚РёРєРё Рё РїРѕСЃС‚РѕСЏРЅРЅРѕР№ РЅР°РіСЂСѓР·РєРё С‚СЂРµР±СѓРµС‚ РїРѕРґРґРµСЂР¶РєРё.'],solutions:['РЎРЅРёР·СЊ РЅР°РіСЂСѓР·РєСѓ Рё РѕР±СЂР°С‚РёСЃСЊ Р·Р° Р¶РёРІРѕР№ РїРѕРјРѕС‰СЊСЋ.']};
+    }
+  },
+  lay:{
+    name:'Lay Procrastination',
+    desc:'РћС‚РјРµС‚СЊ, РЅР°СЃРєРѕР»СЊРєРѕ СѓС‚РІРµСЂР¶РґРµРЅРёСЏ РїСЂРѕ РѕС‚РєР»Р°РґС‹РІР°РЅРёРµ РїСЂРѕ С‚РµР±СЏ.',
+    questions:makeQuestions([
+      'РЇ РѕС‚РєР»Р°РґС‹РІР°СЋ РІР°Р¶РЅС‹Рµ РґРµР»Р° РґРѕ РїРѕСЃР»РµРґРЅРµРіРѕ РјРѕРјРµРЅС‚Р°.',
+      'РЇ РѕР±С‹С‡РЅРѕ РЅР°С‡РёРЅР°СЋ Р·Р°РґР°РЅРёСЏ Р·Р°СЂР°РЅРµРµ.',
+      'РњРЅРµ С‚СЂСѓРґРЅРѕ РїСЂРёСЃС‚СѓРїРёС‚СЊ Рє РЅРµРїСЂРёСЏС‚РЅРѕР№ Р·Р°РґР°С‡Рµ.',
+      'РЇ С‡Р°СЃС‚Рѕ Р·Р°РјРµРЅСЏСЋ РІР°Р¶РЅС‹Рµ РґРµР»Р° РјРµР»РѕС‡Р°РјРё.',
+      'РЇ С‚СЏРЅСѓ РІСЂРµРјСЏ, РґР°Р¶Рµ РєРѕРіРґР° РїРѕРЅРёРјР°СЋ РїРѕСЃР»РµРґСЃС‚РІРёСЏ.',
+      'РЇ Р±С‹СЃС‚СЂРѕ Р±РµСЂСѓСЃСЊ Р·Р° РґРµР»Рѕ, РµСЃР»Рё РµСЃС‚СЊ РґРµРґР»Р°Р№РЅ.',
+      'РЇ С‡Р°СЃС‚Рѕ Р¶РґСѓ В«РїСЂР°РІРёР»СЊРЅРѕРіРѕ РЅР°СЃС‚СЂРѕРµРЅРёСЏВ», С‡С‚РѕР±С‹ РЅР°С‡Р°С‚СЊ.',
+      'РЇ Р·Р°РІРµСЂС€Р°СЋ РґРµР»Р° Р±РµР· Р»РёС€РЅРёС… РѕС‚СЃСЂРѕС‡РµРє.',
+      'РЇ РѕС‚РєР»Р°РґС‹РІР°СЋ РґР°Р¶Рµ РїСЂРѕСЃС‚С‹Рµ СЂРµС€РµРЅРёСЏ.',
+      'РЇ С‡Р°СЃС‚Рѕ Р¶Р°Р»РµСЋ, С‡С‚Рѕ СЃРЅРѕРІР° С‚СЏРЅСѓР».',
+      'РЇ СЂР°Р·Р±РёРІР°СЋ Р±РѕР»СЊС€РёРµ Р·Р°РґР°С‡Рё РЅР° С€Р°РіРё Рё РЅР°С‡РёРЅР°СЋ СЃСЂР°Р·Сѓ.',
+      'РњРЅРµ СЃР»РѕР¶РЅРѕ РґРµСЂР¶Р°С‚СЊ СЃС‚Р°Р±РёР»СЊРЅС‹Р№ С‚РµРјРї СЂР°Р±РѕС‚С‹.',
+      'РЇ РѕС‚РІР»РµРєР°СЋСЃСЊ, РєРѕРіРґР° РґРµР»Рѕ СЃС‚Р°РЅРѕРІРёС‚СЃСЏ С‚СЂСѓРґРЅС‹Рј.',
+      'РЇ СѓРјРµСЋ РґРѕРІРѕРґРёС‚СЊ РЅР°С‡Р°С‚РѕРµ РґРѕ РєРѕРЅС†Р° РІРѕРІСЂРµРјСЏ.',
+      'РЇ С‡Р°СЃС‚Рѕ РѕС‚РєР»Р°РґС‹РІР°СЋ РЅРµРїСЂРѕСЃС‚С‹Рµ СЂР°Р·РіРѕРІРѕСЂС‹.',
+      'РЇ РЅР°С‡РёРЅР°СЋ РїРѕРґРіРѕС‚РѕРІРєСѓ С‚РѕР»СЊРєРѕ РєРѕРіРґР° В«РіРѕСЂРёС‚В».',
+      'РЇ Р±С‹СЃС‚СЂРѕ РІРѕР·РІСЂР°С‰Р°СЋСЃСЊ Рє Р·Р°РґР°С‡Рµ РїРѕСЃР»Рµ РїРµСЂРµСЂС‹РІР°.',
+      'РЇ РѕС‚РєР»Р°РґС‹РІР°СЋ РёР·-Р·Р° СЃС‚СЂР°С…Р° СЃРґРµР»Р°С‚СЊ РїР»РѕС…Рѕ.',
+      'РЇ РѕР±РµС‰Р°СЋ СЃРµР±Рµ РЅР°С‡Р°С‚СЊ В«СЃ РїРѕРЅРµРґРµР»СЊРЅРёРєР°В».',
+      'РР·-Р·Р° РѕС‚РєР»Р°РґС‹РІР°РЅРёСЏ Сѓ РјРµРЅСЏ РЅР°РєР°РїР»РёРІР°РµС‚СЃСЏ СЃС‚СЂРµСЃСЃ.'
+    ],OPT_AGREE5,[1,5,7,10,13,16]),
+    score:(s)=>{
+      if(s<=20)return{emoji:'рџ™‚',title:'РќРёР·РєР°СЏ РїСЂРѕРєСЂР°СЃС‚РёРЅР°С†РёСЏ (Lay)',text:'РћС‚РєР»Р°РґС‹РІР°РЅРёРµ РІ РїСЂРµРґРµР»Р°С… РЅРѕСЂРјС‹.',level:'low',causes:[],solutions:['РџСЂРѕРґРѕР»Р¶Р°Р№ СЂР°Р·Р±РёРІР°С‚СЊ Р·Р°РґР°С‡Рё РЅР° РјР°Р»С‹Рµ С€Р°РіРё.']};
+      if(s<=40)return{emoji:'рџ™Ѓ',title:'РЈРјРµСЂРµРЅРЅР°СЏ РїСЂРѕРєСЂР°СЃС‚РёРЅР°С†РёСЏ (Lay)',text:'РРЅРѕРіРґР° РѕС‚РєР»Р°РґС‹РІР°РЅРёРµ РјРµС€Р°РµС‚ С‚РµРјРїСѓ.',level:'mid',causes:['РћС‚РєР»Р°РґС‹РІР°РЅРёРµ С‡Р°СЃС‚Рѕ СѓСЃРёР»РёРІР°РµС‚СЃСЏ РїСЂРё СЃС‚СЂР°С…Рµ РѕС†РµРЅРєРё.'],solutions:['РСЃРїРѕР»СЊР·СѓР№ РїСЂР°РІРёР»Рѕ В«5 РјРёРЅСѓС‚ СЃС‚Р°СЂС‚Р°В» РґР»СЏ СЃР»РѕР¶РЅС‹С… РґРµР».']};
+      if(s<=60)return{emoji:'рџџ',title:'Р’С‹СЃРѕРєР°СЏ РїСЂРѕРєСЂР°СЃС‚РёРЅР°С†РёСЏ (Lay)',text:'РћС‚РєР»Р°РґС‹РІР°РЅРёРµ Р·Р°РјРµС‚РЅРѕ РІР»РёСЏРµС‚ РЅР° СЃС‚СЂРµСЃСЃ Рё СЂРµР·СѓР»СЊС‚Р°С‚С‹.',level:'high',causes:['РџРѕСЂРѕС‡РЅС‹Р№ РєСЂСѓРі: С‚СЂРµРІРѕРіР° в†’ РѕС‚РєР»Р°РґС‹РІР°РЅРёРµ в†’ РµС‰Рµ Р±РѕР»СЊС€Рµ С‚СЂРµРІРѕРіРё.'],solutions:['РџРѕРїСЂРѕР±СѓР№ РїР»Р°РЅ РґРЅСЏ СЃ РѕРґРЅРѕР№ РєР»СЋС‡РµРІРѕР№ Р·Р°РґР°С‡РµР№ Рё РєРѕРЅС‚СЂРѕР»РµРј РѕС‚РІР»РµС‡РµРЅРёР№.']};
+      return{emoji:'рџ†',title:'РћС‡РµРЅСЊ РІС‹СЃРѕРєР°СЏ РїСЂРѕРєСЂР°СЃС‚РёРЅР°С†РёСЏ (Lay)',text:'РќСѓР¶РЅР° РїРѕРґРґРµСЂР¶РєР° РІ РЅР°СЃС‚СЂРѕР№РєРµ СЂРµР¶РёРјР° Рё РЅР°РіСЂСѓР·РєРё.',level:'urgent',causes:['РҐСЂРѕРЅРёС‡РµСЃРєРѕРµ РѕС‚РєР»Р°РґС‹РІР°РЅРёРµ РёСЃС‚РѕС‰Р°РµС‚ Рё СЃРЅРёР¶Р°РµС‚ СЃР°РјРѕРѕС†РµРЅРєСѓ.'],solutions:['РћР±СЃСѓРґРё СЃ РЅР°СЃС‚Р°РІРЅРёРєРѕРј РёР»Рё РїСЃРёС…РѕР»РѕРіРѕРј РїРѕСЌС‚Р°РїРЅС‹Р№ РїР»Р°РЅ РІРѕСЃСЃС‚Р°РЅРѕРІР»РµРЅРёСЏ.']};
+    }
+  },
+  tas20:{
+    name:'TAS-20',
+    desc:'РћС‚РјРµС‚СЊ, РЅР°СЃРєРѕР»СЊРєРѕ С‚РµР±Рµ Р±Р»РёР·РєРё СЌС‚Рё СѓС‚РІРµСЂР¶РґРµРЅРёСЏ РѕР± СЌРјРѕС†РёСЏС….',
+    questions:makeQuestions([
+      'РњРЅРµ С‚СЂСѓРґРЅРѕ РїРѕРЅСЏС‚СЊ, С‡С‚Рѕ СЏ С‡СѓРІСЃС‚РІСѓСЋ.',
+      'РњРЅРµ СЃР»РѕР¶РЅРѕ РїРѕРґРѕР±СЂР°С‚СЊ СЃР»РѕРІР° РґР»СЏ СЃРІРѕРёС… С‡СѓРІСЃС‚РІ.',
+      'РЈ РјРµРЅСЏ Р±С‹РІР°СЋС‚ С‚РµР»РµСЃРЅС‹Рµ СЂРµР°РєС†РёРё, Рё СЏ РЅРµ РїРѕРЅРёРјР°СЋ РёС… СЌРјРѕС†РёРѕРЅР°Р»СЊРЅСѓСЋ РїСЂРёС‡РёРЅСѓ.',
+      'РЇ Р»РµРіРєРѕ РѕРїРёСЃС‹РІР°СЋ СЃРІРѕРё С‡СѓРІСЃС‚РІР° РґСЂСѓРіРёРј.',
+      'РЇ С…РѕСЂРѕС€Рѕ СЂР°Р·Р»РёС‡Р°СЋ РѕС‚С‚РµРЅРєРё СЃРІРѕРёС… СЌРјРѕС†РёР№.',
+      'РњРЅРµ С‚СЂСѓРґРЅРµРµ РіРѕРІРѕСЂРёС‚СЊ Рѕ С‡СѓРІСЃС‚РІР°С…, С‡РµРј Рѕ С„Р°РєС‚Р°С….',
+      'РЇ С‡Р°СЃС‚Рѕ РїСѓС‚Р°СЋ С‚СЂРµРІРѕРіСѓ, Р·Р»РѕСЃС‚СЊ Рё СѓСЃС‚Р°Р»РѕСЃС‚СЊ.',
+      'РњРЅРµ РєР°Р¶РµС‚СЃСЏ, С‡С‚Рѕ СЌРјРѕС†РёРё С‚РѕР»СЊРєРѕ РјРµС€Р°СЋС‚.',
+      'РљРѕРіРґР° СЏ СЂР°СЃСЃС‚СЂРѕРµРЅ, РЅРµ РІСЃРµРіРґР° РїРѕРЅРёРјР°СЋ РїРѕС‡РµРјСѓ.',
+      'РЇ РѕР±С‹С‡РЅРѕ С…РѕСЂРѕС€Рѕ РїРѕРЅРёРјР°СЋ С‡СѓРІСЃС‚РІР° РґСЂСѓРіРёС….',
+      'РњРЅРµ РїСЂРѕС‰Рµ РёР·Р±РµРіР°С‚СЊ С‡СѓРІСЃС‚РІ, С‡РµРј СЂР°Р·Р±РёСЂР°С‚СЊСЃСЏ РІ РЅРёС….',
+      'РЇ СЂРµРґРєРѕ РјРѕРіСѓ С‚РѕС‡РЅРѕ РЅР°Р·РІР°С‚СЊ СЃРІРѕРµ СЃРѕСЃС‚РѕСЏРЅРёРµ.',
+      'РЇ Р·Р°РјРµС‡Р°СЋ СЌРјРѕС†РёРё СЃР»РёС€РєРѕРј РїРѕР·РґРЅРѕ.',
+      'РЇ РїСЂРµРґРїРѕС‡РёС‚Р°СЋ РѕР±СЃСѓР¶РґР°С‚СЊ СЃРѕР±С‹С‚РёСЏ, Р° РЅРµ РїРµСЂРµР¶РёРІР°РЅРёСЏ.',
+      'РЇ С‚РµСЂСЏСЋСЃСЊ, РєРѕРіРґР° РјРµРЅСЏ СЃРїСЂР°С€РёРІР°СЋС‚ В«С‡С‚Рѕ С‚С‹ С‡СѓРІСЃС‚РІСѓРµС€СЊ?В».',
+      'РњРЅРµ С‚СЂСѓРґРЅРѕ РѕР±СЉСЏСЃРЅРёС‚СЊ Р±Р»РёР·РєРёРј, С‡С‚Рѕ СЃРѕ РјРЅРѕР№ РїСЂРѕРёСЃС…РѕРґРёС‚.',
+      'РЇ С‡Р°С‰Рµ РѕРїРёСЃС‹РІР°СЋ СЃРёРјРїС‚РѕРјС‹, С‡РµРј СЌРјРѕС†РёРё.',
+      'РЇ РјРѕРіСѓ РїРѕРґСЂРѕР±РЅРѕ СЂР°СЃСЃРєР°Р·Р°С‚СЊ Рѕ СЃРІРѕРµРј СЌРјРѕС†РёРѕРЅР°Р»СЊРЅРѕРј СЃРѕСЃС‚РѕСЏРЅРёРё.',
+      'РЇ СѓРјРµСЋ РѕС‚РґРµР»СЏС‚СЊ РјС‹СЃР»Рё РѕС‚ С‡СѓРІСЃС‚РІ.',
+      'РРЅРѕРіРґР° СЏ РЅРµ РїРѕРЅРёРјР°СЋ, РїРѕС‡РµРјСѓ СЂРµР°РіРёСЂСѓСЋ С‚Р°Рє СЃРёР»СЊРЅРѕ.'
+    ],OPT_AGREE5,[3,4,9,17,18]),
+    score:(s)=>{
+      if(s<=20)return{emoji:'рџ™‚',title:'РќРёР·РєРёР№ СЂРёСЃРє Р°Р»РµРєСЃРёС‚РёРјРёРё (TAS-20)',text:'РўС‹ РґРѕСЃС‚Р°С‚РѕС‡РЅРѕ С…РѕСЂРѕС€Рѕ СЂР°Р·Р»РёС‡Р°РµС€СЊ Рё РѕРїРёСЃС‹РІР°РµС€СЊ СЌРјРѕС†РёРё.',level:'low',causes:[],solutions:['РЎРѕС…СЂР°РЅСЏР№ РїСЂР°РєС‚РёРєСѓ СЌРјРѕС†РёРѕРЅР°Р»СЊРЅРѕР№ СЂРµС„Р»РµРєСЃРёРё.']};
+      if(s<=40)return{emoji:'рџ™Ѓ',title:'РЈРјРµСЂРµРЅРЅС‹Рµ С‚СЂСѓРґРЅРѕСЃС‚Рё (TAS-20)',text:'РРЅРѕРіРґР° Р±С‹РІР°РµС‚ СЃР»РѕР¶РЅРѕ РїРѕРЅСЏС‚СЊ Рё РѕР·РІСѓС‡РёС‚СЊ СЃРІРѕРё С‡СѓРІСЃС‚РІР°.',level:'mid',causes:['РџСЂРё РЅР°РіСЂСѓР·РєРµ СЌРјРѕС†РёРѕРЅР°Р»СЊРЅР°СЏ РѕСЃРѕР·РЅР°РЅРЅРѕСЃС‚СЊ С‡Р°СЃС‚Рѕ СЃРЅРёР¶Р°РµС‚СЃСЏ.'],solutions:['РџРѕРїСЂРѕР±СѓР№ РґРЅРµРІРЅРёРє СЌРјРѕС†РёР№: СЃРёС‚СѓР°С†РёСЏ в†’ С‡СѓРІСЃС‚РІРѕ в†’ РјС‹СЃР»СЊ в†’ РґРµР№СЃС‚РІРёРµ.']};
+      if(s<=60)return{emoji:'рџџ',title:'Р’С‹СЃРѕРєРёР№ СЂРёСЃРє Р°Р»РµРєСЃРёС‚РёРјРёРё (TAS-20)',text:'РўСЂСѓРґРЅРѕСЃС‚Рё СЃ СЂР°СЃРїРѕР·РЅР°РІР°РЅРёРµРј СЌРјРѕС†РёР№ РјРѕРіСѓС‚ РІР»РёСЏС‚СЊ РЅР° СЃС‚СЂРµСЃСЃ Рё РѕС‚РЅРѕС€РµРЅРёСЏ.',level:'high',causes:['РќРµСЂР°СЃРїРѕР·РЅР°РЅРЅС‹Рµ СЌРјРѕС†РёРё С‡Р°СЃС‚Рѕ РїРµСЂРµС…РѕРґСЏС‚ РІ С‚РµР»РµСЃРЅРѕРµ РЅР°РїСЂСЏР¶РµРЅРёРµ.'],solutions:['Р РµРєРѕРјРµРЅРґСѓРµС‚СЃСЏ РїРѕРґРґРµСЂР¶РєР° СЃРїРµС†РёР°Р»РёСЃС‚Р° РїРѕ СЌРјРѕС†РёРѕРЅР°Р»СЊРЅРѕР№ СЂРµРіСѓР»СЏС†РёРё.']};
+      return{emoji:'рџ†',title:'РћС‡РµРЅСЊ РІС‹СЃРѕРєРёР№ СЂРёСЃРє Р°Р»РµРєСЃРёС‚РёРјРёРё (TAS-20)',text:'РЎРѕСЃС‚РѕСЏРЅРёРµ С‚СЂРµР±СѓРµС‚ РјСЏРіРєРѕР№, РЅРѕ СЂРµРіСѓР»СЏСЂРЅРѕР№ РїРѕРјРѕС‰Рё.',level:'urgent',causes:['Р”Р»РёС‚РµР»СЊРЅРѕРµ РїРѕРґР°РІР»РµРЅРёРµ СЌРјРѕС†РёР№ СѓСЃРёР»РёРІР°РµС‚ РёСЃС‚РѕС‰РµРЅРёРµ.'],solutions:['РћР±СЂР°С‚РёСЃСЊ Р·Р° РїРѕРјРѕС‰СЊСЋ Рє СЃРїРµС†РёР°Р»РёСЃС‚Сѓ Рё РЅРµ РѕСЃС‚Р°РІР°Р№СЃСЏ РѕРґРёРЅ.']};
+    }
+  },
+  maddi:{
+    name:'Hardiness (Maddi)',
+    desc:'РћС†РµРЅРё, РєР°Рє С‚С‹ РѕР±С‹С‡РЅРѕ СЂРµР°РіРёСЂСѓРµС€СЊ РЅР° СЃС‚СЂРµСЃСЃ Рё РїРµСЂРµРјРµРЅС‹.',
+    questions:makeQuestions([
+      'Р’ СЃР»РѕР¶РЅРѕР№ СЃРёС‚СѓР°С†РёРё СЏ РёС‰Сѓ, С‡С‚Рѕ РјРѕР¶РЅРѕ СЃРґРµР»Р°С‚СЊ РїСЂСЏРјРѕ СЃРµР№С‡Р°СЃ.',
+      'РџСЂРё СЃС‚СЂРµСЃСЃРµ РјРЅРµ РєР°Р¶РµС‚СЃСЏ, С‡С‚Рѕ РѕС‚ РјРµРЅСЏ РЅРёС‡РµРіРѕ РЅРµ Р·Р°РІРёСЃРёС‚.',
+      'РњРЅРµ СѓРґР°РµС‚СЃСЏ СЃРѕС…СЂР°РЅСЏС‚СЊ РІРѕРІР»РµС‡РµРЅРЅРѕСЃС‚СЊ, РґР°Р¶Рµ РєРѕРіРґР° С‚СЏР¶РµР»Рѕ.',
+      'РЇ РІРѕСЃРїСЂРёРЅРёРјР°СЋ С‚СЂСѓРґРЅРѕСЃС‚Рё РєР°Рє РІРѕР·РјРѕР¶РЅРѕСЃС‚СЊ РЅР°СѓС‡РёС‚СЊСЃСЏ РЅРѕРІРѕРјСѓ.',
+      'РљРѕРіРґР° РЅРµ РїРѕР»СѓС‡Р°РµС‚СЃСЏ, СЏ Р±С‹СЃС‚СЂРѕ РѕРїСѓСЃРєР°СЋ СЂСѓРєРё.',
+      'РЇ СѓРјРµСЋ РґРµР»РёС‚СЊ РїСЂРѕР±Р»РµРјСѓ РЅР° СЂРµС€Р°РµРјС‹Рµ С€Р°РіРё.',
+      'РЇ С‡СѓРІСЃС‚РІСѓСЋ, С‡С‚Рѕ РјРѕРіСѓ РІР»РёСЏС‚СЊ РЅР° СЃРІРѕРё СЂРµС€РµРЅРёСЏ.',
+      'Р›СЋР±С‹Рµ РїРµСЂРµРјРµРЅС‹ РІС‹Р·С‹РІР°СЋС‚ Сѓ РјРµРЅСЏ С‚РѕР»СЊРєРѕ СЃС‚СЂР°С….',
+      'Р’ РєСЂРёР·РёСЃРµ СЏ СЃС‚Р°СЂР°СЋСЃСЊ СЃРѕС…СЂР°РЅСЏС‚СЊ РєРѕРЅС‚Р°РєС‚ СЃ РїРѕРґРґРµСЂР¶РёРІР°СЋС‰РёРјРё Р»СЋРґСЊРјРё.',
+      'РЇ РјРѕРіСѓ РїСЂРѕРґРѕР»Р¶Р°С‚СЊ РІР°Р¶РЅС‹Рµ РґРµР»Р° РґР°Р¶Рµ РїСЂРё РЅР°РїСЂСЏР¶РµРЅРёРё.',
+      'Р•СЃР»Рё РѕР±СЃС‚РѕСЏС‚РµР»СЊСЃС‚РІР° РјРµРЅСЏСЋС‚СЃСЏ, СЏ С‚РµСЂСЏСЋСЃСЊ Рё Р·Р°РјРёСЂР°СЋ.',
+      'РњРЅРµ РїРѕРјРѕРіР°РµС‚ С‡СѓРІСЃС‚РІРѕ СЃРјС‹СЃР»Р° РІ С‚РѕРј, С‡С‚Рѕ СЏ РґРµР»Р°СЋ.',
+      'РЇ СЃРїРѕСЃРѕР±РµРЅ РІРѕСЃСЃС‚Р°РЅР°РІР»РёРІР°С‚СЊСЃСЏ РїРѕСЃР»Рµ РЅРµСѓРґР°С‡.',
+      'РџРѕРґ РґР°РІР»РµРЅРёРµРј СЏ С‡СѓРІСЃС‚РІСѓСЋ СЃРµР±СЏ Р±РµСЃРїРѕРјРѕС‰РЅС‹Рј.',
+      'РЇ СѓРјРµСЋ Р·Р°РјРµС‡Р°С‚СЊ, С‡С‚Рѕ СѓР¶Рµ СЂР°Р±РѕС‚Р°РµС‚ РІ РјРѕРµР№ СЃРёС‚СѓР°С†РёРё.',
+      'РЎС‚СЂРµСЃСЃ РґРµР»Р°РµС‚ РјРµРЅСЏ РїР°СЃСЃРёРІРЅС‹Рј РЅР°РґРѕР»РіРѕ.',
+      'РЇ РјРѕРіСѓ РїСЂРѕСЃРёС‚СЊ РїРѕРјРѕС‰СЊ, РєРѕРіРґР° РѕРЅР° РЅСѓР¶РЅР°.',
+      'Р”Р°Р¶Рµ РІ С‚СЂСѓРґРЅС‹Р№ РїРµСЂРёРѕРґ СЏ СЃРѕС…СЂР°РЅСЏСЋ РѕРїРѕСЂСѓ РЅР° С†РµРЅРЅРѕСЃС‚Рё.'
+    ],OPT_AGREE5,[1,4,7,10,13,15]),
+    score:(s)=>{
+      if(s>=54)return{emoji:'рџ’Є',title:'Р’С‹СЃРѕРєР°СЏ Р¶РёР·РЅРµСЃС‚РѕР№РєРѕСЃС‚СЊ (Maddi)',text:'РўС‹ СЃРѕС…СЂР°РЅСЏРµС€СЊ РєРѕРЅС‚СЂРѕР»СЊ Рё РІРѕРІР»РµС‡РµРЅРЅРѕСЃС‚СЊ РІ СЃС‚СЂРµСЃСЃРµ.',level:'low',causes:[],solutions:['РџСЂРѕРґРѕР»Р¶Р°Р№ РѕРїРёСЂР°С‚СЊСЃСЏ РЅР° РїСЂРёРІС‹С‡РєРё, РєРѕС‚РѕСЂС‹Рµ С‚РµР±СЏ РїРѕРґРґРµСЂР¶РёРІР°СЋС‚.']};
+      if(s>=40)return{emoji:'рџ™‚',title:'РЎСЂРµРґРЅСЏСЏ Р¶РёР·РЅРµСЃС‚РѕР№РєРѕСЃС‚СЊ (Maddi)',text:'Р РµСЃСѓСЂСЃ РµСЃС‚СЊ, РЅРѕ РІ РїРµСЂРёРѕРґС‹ РЅР°РіСЂСѓР·РєРё РѕРЅ СЃРЅРёР¶Р°РµС‚СЃСЏ.',level:'mid',causes:['РџСЂРё РїРµСЂРµРіСЂСѓР·РєРµ РјРѕР¶РµС‚ СЃРЅРёР¶Р°С‚СЊСЃСЏ РѕС‰СѓС‰РµРЅРёРµ РєРѕРЅС‚СЂРѕР»СЏ.'],solutions:['Р Р°Р·РґРµР»СЏР№ С†РµР»Рё РЅР° РјР°Р»С‹Рµ С€Р°РіРё Рё Р·Р°РєСЂРµРїР»СЏР№ СЂСѓС‚РёРЅСѓ РІРѕСЃСЃС‚Р°РЅРѕРІР»РµРЅРёСЏ.']};
+      if(s>=28)return{emoji:'рџ•',title:'РЎРЅРёР¶РµРЅРЅР°СЏ Р¶РёР·РЅРµСЃС‚РѕР№РєРѕСЃС‚СЊ (Maddi)',text:'РЎС‚СЂРµСЃСЃ С‚СЂСѓРґРЅРѕ РІС‹РЅРѕСЃРёС‚СЃСЏ, РЅСѓР¶РЅР° РґРѕРїРѕР»РЅРёС‚РµР»СЊРЅР°СЏ РѕРїРѕСЂР°.',level:'high',causes:['РџРѕСЃС‚РѕСЏРЅРЅРѕРµ РЅР°РїСЂСЏР¶РµРЅРёРµ РёСЃС‚РѕС‰Р°РµС‚ РїСЃРёС…РѕР»РѕРіРёС‡РµСЃРєРёРµ СЂРµСЃСѓСЂСЃС‹.'],solutions:['РџРѕР»РµР·РЅРѕ РѕР±СЃСѓРґРёС‚СЊ СЃС‚СЂР°С‚РµРіРёРё РїРѕРґРґРµСЂР¶РєРё СЃРѕ СЃРїРµС†РёР°Р»РёСЃС‚РѕРј.']};
+      return{emoji:'рџ†',title:'РќРёР·РєР°СЏ Р¶РёР·РЅРµСЃС‚РѕР№РєРѕСЃС‚СЊ (Maddi)',text:'РЎРµР№С‡Р°СЃ РІР°Р¶РЅР° Р¶РёРІР°СЏ РїРѕРґРґРµСЂР¶РєР° Рё РІРѕСЃСЃС‚Р°РЅРѕРІР»РµРЅРёРµ СЂРµСЃСѓСЂСЃР°.',level:'urgent',causes:['РџСЂРё РґРѕР»РіРѕРј СЃС‚СЂРµСЃСЃРµ РЅРµРґРѕСЃС‚Р°С‚РѕРє РѕРїРѕСЂС‹ РјРѕР¶РµС‚ СѓСЃРёР»РёРІР°С‚СЊ РєСЂРёР·РёСЃ.'],solutions:['РћР±СЂР°С‚РёСЃСЊ Р·Р° РїРѕРјРѕС‰СЊСЋ РІ СЂР°Р·РґРµР» РїРѕРјРѕС‰Рё Рё Рє РґРѕРІРµСЂРµРЅРЅС‹Рј РІР·СЂРѕСЃР»С‹Рј.']};
+    }
+  },
+  lazarus:{
+    name:'Lazarus Coping',
+    desc:'РћС‚РјРµС‚СЊ, РєР°РєРёРµ СЃС‚СЂР°С‚РµРіРёРё СЃРїСЂР°РІР»РµРЅРёСЏ СЃРѕ СЃС‚СЂРµСЃСЃРѕРј С‚С‹ РёСЃРїРѕР»СЊР·СѓРµС€СЊ.',
+    questions:makeQuestions([
+      'РЇ СЃС‚Р°СЂР°СЋСЃСЊ С‡РµС‚РєРѕ РѕРїСЂРµРґРµР»РёС‚СЊ РїСЂРѕР±Р»РµРјСѓ.',
+      'РЇ СЃРѕСЃС‚Р°РІР»СЏСЋ РєРѕРЅРєСЂРµС‚РЅС‹Р№ РїР»Р°РЅ РґРµР№СЃС‚РІРёР№.',
+      'РЇ РёС‰Сѓ РёРЅС„РѕСЂРјР°С†РёСЋ, С‡С‚РѕР±С‹ Р»СѓС‡С€Рµ РїРѕРЅСЏС‚СЊ СЃРёС‚СѓР°С†РёСЋ.',
+      'РЇ РѕР±СЃСѓР¶РґР°СЋ РїСЂРѕР±Р»РµРјСѓ СЃ С‚РµРј, РєС‚Рѕ РјРѕР¶РµС‚ РїРѕРјРѕС‡СЊ.',
+      'РЇ РїСЂРѕС€Сѓ РїРѕРґРґРµСЂР¶РєРё Сѓ Р±Р»РёР·РєРёС….',
+      'РЇ СЃС‚Р°СЂР°СЋСЃСЊ РїРѕСЃРјРѕС‚СЂРµС‚СЊ РЅР° СЃРёС‚СѓР°С†РёСЋ РїРѕРґ РґСЂСѓРіРёРј СѓРіР»РѕРј.',
+      'РЇ РЅР°РїРѕРјРёРЅР°СЋ СЃРµР±Рµ, С‡С‚Рѕ СЌС‚Рѕ РІСЂРµРјРµРЅРЅРѕ.',
+      'РЇ СЃРѕР·РЅР°С‚РµР»СЊРЅРѕ РїРµСЂРµРєР»СЋС‡Р°СЋСЃСЊ РЅР° РїРѕР»РµР·РЅСѓСЋ Р°РєС‚РёРІРЅРѕСЃС‚СЊ.',
+      'РЇ СЃС‚Р°СЂР°СЋСЃСЊ СЃРґРµСЂР¶РёРІР°С‚СЊ СЌРјРѕС†РёРё, С‡С‚РѕР±С‹ РЅРµ РЅР°РІСЂРµРґРёС‚СЊ СЃРµР±Рµ.',
+      'РЇ РїРѕР·РІРѕР»СЏСЋ СЃРµР±Рµ РІС‹РїР»РµСЃРєРёРІР°С‚СЊ СЌРјРѕС†РёРё Р±РµР·РѕРїР°СЃРЅРѕ.',
+      'РЇ РѕС‚РєР»Р°РґС‹РІР°СЋ СЂРµС€РµРЅРёРµ Рё РЅР°РґРµСЋСЃСЊ, С‡С‚Рѕ РІСЃРµ РїСЂРѕР№РґРµС‚ СЃР°РјРѕ.',
+      'РЇ РёР·Р±РµРіР°СЋ РјС‹СЃР»РµР№ Рѕ РїСЂРѕР±Р»РµРјРµ.',
+      'РЇ РІРёРЅСЋ СЃРµР±СЏ Р·Р° РїСЂРѕРёСЃС…РѕРґСЏС‰РµРµ.',
+      'РЇ РІРёРЅСЋ РґСЂСѓРіРёС… Р·Р° РїСЂРѕРёСЃС…РѕРґСЏС‰РµРµ.',
+      'РЇ РёСЃРїРѕР»СЊР·СѓСЋ СЋРјРѕСЂ, С‡С‚РѕР±С‹ СЃРЅРёР·РёС‚СЊ РЅР°РїСЂСЏР¶РµРЅРёРµ.',
+      'РЇ СЃС‚Р°СЂР°СЋСЃСЊ РїСЂРёРЅСЏС‚СЊ С‚Рѕ, С‡С‚Рѕ РёР·РјРµРЅРёС‚СЊ РЅРµР»СЊР·СЏ.',
+      'РЇ РїРµСЂРµСЃРјР°С‚СЂРёРІР°СЋ РїСЂРёРѕСЂРёС‚РµС‚С‹ Рё СЃРѕРєСЂР°С‰Р°СЋ РЅР°РіСЂСѓР·РєСѓ.',
+      'РЇ РѕС‚РєР»Р°РґС‹РІР°СЋ РґРµР»Р° РёР·-Р·Р° СЃС‚СЂРµСЃСЃР°.',
+      'РЇ РІРѕР·РІСЂР°С‰Р°СЋ РєРѕРЅС‚СЂРѕР»СЊ С‡РµСЂРµР· РјР°Р»РµРЅСЊРєРёРµ С€Р°РіРё.',
+      'РЇ РёС‰Сѓ РїСЂРѕС„РµСЃСЃРёРѕРЅР°Р»СЊРЅСѓСЋ РїРѕРјРѕС‰СЊ.',
+      'РЇ РІРµРґСѓ Р·Р°РїРёСЃРё, С‡С‚РѕР±С‹ РѕС‚СЃР»РµР¶РёРІР°С‚СЊ СЃРѕСЃС‚РѕСЏРЅРёРµ.',
+      'РЇ РёСЃРїРѕР»СЊР·СѓСЋ РґС‹С…Р°РЅРёРµ РёР»Рё СЂРµР»Р°РєСЃР°С†РёСЋ.',
+      'РЇ Р·Р°РјС‹РєР°СЋСЃСЊ Рё РїРµСЂРµСЃС‚Р°СЋ РѕР±С‰Р°С‚СЊСЃСЏ.',
+      'РЇ РѕС‚РјРµС‡Р°СЋ РґР°Р¶Рµ РЅРµР±РѕР»СЊС€РѕР№ РїСЂРѕРіСЂРµСЃСЃ.'
+    ],OPT_USE4,[10,11,12,13,17,22]),
+    score:(s)=>{
+      if(s>=54)return{emoji:'рџ™‚',title:'Р“РёР±РєРёР№ РєРѕРїРёРЅРі (Lazarus)',text:'РўС‹ РёСЃРїРѕР»СЊР·СѓРµС€СЊ РјРЅРѕРіРѕ СЂР°Р±РѕС‡РёС… СЃС‚СЂР°С‚РµРіРёР№ СЃРїСЂР°РІР»РµРЅРёСЏ.',level:'low',causes:[],solutions:['РџРѕРґРґРµСЂР¶РёРІР°Р№ СЃС‚СЂР°С‚РµРіРёРё, РєРѕС‚РѕСЂС‹Рµ РґР°СЋС‚ РѕС‰СѓС‚РёРјС‹Р№ СЌС„С„РµРєС‚.']};
+      if(s>=38)return{emoji:'рџ™Ѓ',title:'РЎСЂРµРґРЅРёР№ РєРѕРїРёРЅРі-СЂРµСЃСѓСЂСЃ (Lazarus)',text:'Р§Р°СЃС‚СЊ СЃС‚СЂР°С‚РµРіРёР№ СЂР°Р±РѕС‚Р°РµС‚, РЅРѕ РЅРµ РІСЃРµРіРґР° СЃС‚Р°Р±РёР»СЊРЅРѕ.',level:'mid',causes:['РџСЂРё РїРµСЂРµРіСЂСѓР·РєРµ РјРѕР¶РЅРѕ СЃРѕСЃРєР°Р»СЊР·С‹РІР°С‚СЊ РІ РёР·Р±РµРіР°РЅРёРµ.'],solutions:['Р’С‹Р±РµСЂРё 2вЂ“3 СЃС‚СЂР°С‚РµРіРёРё Рё С„РёРєСЃРёСЂСѓР№ РёС… РµР¶РµРґРЅРµРІРЅРѕ.']};
+      if(s>=24)return{emoji:'рџ•',title:'РЎРЅРёР¶РµРЅРЅР°СЏ СЌС„С„РµРєС‚РёРІРЅРѕСЃС‚СЊ РєРѕРїРёРЅРіР° (Lazarus)',text:'РЎС‚СЂРµСЃСЃ С‡Р°С‰Рµ СѓСЃРёР»РёРІР°РµС‚СЃСЏ, С‡РµРј СЃРЅРёР¶Р°РµС‚СЃСЏ.',level:'high',causes:['РњР°Р»Рѕ СЂРµСЃСѓСЂСЃРЅС‹С… СЃС‚СЂР°С‚РµРіРёР№ Рё Р±РѕР»СЊС€Рµ РёР·Р±РµРіР°РЅРёСЏ.'],solutions:['РќР°С‡РЅРё СЃ РїР»Р°РЅР° РЅР° РґРµРЅСЊ, РїРѕРґРґРµСЂР¶РєРё Рё РєРѕСЂРѕС‚РєРѕР№ СЂРµР»Р°РєСЃР°С†РёРё.']};
+      return{emoji:'рџ†',title:'РџРµСЂРµРіСЂСѓР·РєР° РІ СЃС‚СЂРµСЃСЃРµ (Lazarus)',text:'РЎРїСЂР°РІР»СЏС‚СЊСЃСЏ РІ РѕРґРёРЅРѕС‡РєСѓ СЃРµР№С‡Р°СЃ РѕС‡РµРЅСЊ С‚СЂСѓРґРЅРѕ.',level:'urgent',causes:['Р”Р»РёС‚РµР»СЊРЅС‹Р№ СЃС‚СЂРµСЃСЃ Р±РµР· РѕРїРѕСЂС‹ Р±С‹СЃС‚СЂРѕ РёСЃС‚РѕС‰Р°РµС‚.'],solutions:['РСЃРїРѕР»СЊР·СѓР№ РєРѕРЅС‚Р°РєС‚С‹ РїРѕРјРѕС‰Рё Рё РѕР±СЃСѓРґРё РїР»Р°РЅ РїРѕРґРґРµСЂР¶РєРё СЃРѕ СЃРїРµС†РёР°Р»РёСЃС‚РѕРј.']};
+    }
+  },
+  msceit:{
+    name:'MSCEIT (adapt.)',
+    desc:'РђРґР°РїС‚РёСЂРѕРІР°РЅРЅС‹Р№ СЃРєСЂРёРЅРёРЅРі СЌРјРѕС†РёРѕРЅР°Р»СЊРЅРѕРіРѕ РёРЅС‚РµР»Р»РµРєС‚Р°.',
+    questions:makeQuestions([
+      'РЇ Р·Р°РјРµС‡Р°СЋ РёР·РјРµРЅРµРЅРёСЏ РІ СЃРІРѕРµРј РЅР°СЃС‚СЂРѕРµРЅРёРё РІ С‚РµС‡РµРЅРёРµ РґРЅСЏ.',
+      'РЇ РїРѕРЅРёРјР°СЋ, РєР°РєРёРµ СЃРѕР±С‹С‚РёСЏ Р·Р°РїСѓСЃРєР°СЋС‚ РјРѕРё СЃРёР»СЊРЅС‹Рµ СЌРјРѕС†РёРё.',
+      'Р’ РєРѕРЅС„Р»РёРєС‚Рµ СЏ РјРѕРіСѓ СЂР°СЃРїРѕР·РЅР°С‚СЊ СЌРјРѕС†РёРё СЃРѕР±РµСЃРµРґРЅРёРєР°.',
+      'Р•СЃР»Рё СЏ Р·Р»СЋСЃСЊ, РјРЅРµ С‚СЂСѓРґРЅРѕ РѕСЃС‚Р°РЅРѕРІРёС‚СЊСЃСЏ.',
+      'РџРµСЂРµРґ РІР°Р¶РЅС‹Рј СЂР°Р·РіРѕРІРѕСЂРѕРј СЏ СѓРјРµСЋ СЃРµР±СЏ СѓСЃРїРѕРєРѕРёС‚СЊ.',
+      'РЇ РїРѕРЅРёРјР°СЋ СЂР°Р·РЅРёС†Сѓ РјРµР¶РґСѓ С‚СЂРµРІРѕРіРѕР№, СЃС‚С‹РґРѕРј Рё Р·Р»РѕСЃС‚СЊСЋ.',
+      'РЇ РјРѕРіСѓ РїРѕРґРґРµСЂР¶Р°С‚СЊ С‡РµР»РѕРІРµРєР° Р±РµР· РѕР±РµСЃС†РµРЅРёРІР°РЅРёСЏ РµРіРѕ С‡СѓРІСЃС‚РІ.',
+      'РџРѕРґ РґР°РІР»РµРЅРёРµРј СЏ РґРµР№СЃС‚РІСѓСЋ РёРјРїСѓР»СЊСЃРёРІРЅРѕ.',
+      'РЇ РјРѕРіСѓ РїРѕРґРѕР±СЂР°С‚СЊ СЃР»РѕРІР° РґР»СЏ СЃР»РѕР¶РЅС‹С… С‡СѓРІСЃС‚РІ.',
+      'РЇ СѓС‡РёС‚С‹РІР°СЋ СЌРјРѕС†РёРё РїСЂРё РїСЂРёРЅСЏС‚РёРё СЂРµС€РµРЅРёР№.',
+      'РњРЅРµ СЃР»РѕР¶РЅРѕ РїРѕРЅСЏС‚СЊ, С‡С‚Рѕ С‡СѓРІСЃС‚РІСѓРµС‚ РґСЂСѓРіРѕР№ С‡РµР»РѕРІРµРє.',
+      'РЇ РјРѕРіСѓ РїРµСЂРµРєР»СЋС‡РёС‚СЊСЃСЏ СЃ РЅРµРіР°С‚РёРІРЅРѕР№ СЌРјРѕС†РёРё РЅР° РєРѕРЅСЃС‚СЂСѓРєС‚РёРІРЅРѕРµ РґРµР№СЃС‚РІРёРµ.',
+      'РЇ Р·Р°РјРµС‡Р°СЋ, РєРѕРіРґР° СЌРјРѕС†РёРё РјРµС€Р°СЋС‚ РјРЅРµ СЃРѕСЃСЂРµРґРѕС‚РѕС‡РёС‚СЊСЃСЏ.',
+      'РЇ РёРіРЅРѕСЂРёСЂСѓСЋ СЃРІРѕРё С‡СѓРІСЃС‚РІР°, РїРѕРєР° РЅРµ В«РЅР°РєСЂРѕРµС‚В».',
+      'РЇ СѓРјРµСЋ РІС‹РґРµСЂР¶РёРІР°С‚СЊ РЅРµРїСЂРёСЏС‚РЅС‹Рµ СЌРјРѕС†РёРё Р±РµР· СЂРµР·РєРёС… РїРѕСЃС‚СѓРїРєРѕРІ.',
+      'РџРѕСЃР»Рµ СЃСЃРѕСЂС‹ СЏ СЃРїРѕСЃРѕР±РµРЅ РІРѕСЃСЃС‚Р°РЅРѕРІРёС‚СЊ РєРѕРЅС‚Р°РєС‚ Рё РѕР±СЃСѓРґРёС‚СЊ СЃРёС‚СѓР°С†РёСЋ.'
+    ],OPT_AGREE5,[3,7,10,13]),
+    score:(s)=>{
+      if(s>=48)return{emoji:'рџ™‚',title:'Р’С‹СЃРѕРєРёР№ СЌРјРѕС†РёРѕРЅР°Р»СЊРЅС‹Р№ РёРЅС‚РµР»Р»РµРєС‚ (MSCEIT adapt.)',text:'РўС‹ СѓРІРµСЂРµРЅРЅРѕ СЂР°СЃРїРѕР·РЅР°РµС€СЊ Рё СЂРµРіСѓР»РёСЂСѓРµС€СЊ СЌРјРѕС†РёРё.',level:'low',causes:[],solutions:['РџСЂРѕРґРѕР»Р¶Р°Р№ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ СЌС‚Рё РЅР°РІС‹РєРё РІ С‚СЂСѓРґРЅС‹С… СЂР°Р·РіРѕРІРѕСЂР°С….']};
+      if(s>=36)return{emoji:'рџ™Ѓ',title:'РЎСЂРµРґРЅРёР№ СѓСЂРѕРІРµРЅСЊ EQ (MSCEIT adapt.)',text:'Р‘Р°Р·РѕРІС‹Рµ РЅР°РІС‹РєРё РµСЃС‚СЊ, РЅРѕ РѕРЅРё РЅРµ РІСЃРµРіРґР° СѓСЃС‚РѕР№С‡РёРІС‹.',level:'mid',causes:['РџСЂРё СѓСЃС‚Р°Р»РѕСЃС‚Рё Рё СЃС‚СЂРµСЃСЃРµ СЌРјРѕС†РёРѕРЅР°Р»СЊРЅР°СЏ СЂРµРіСѓР»СЏС†РёСЏ СЃРЅРёР¶Р°РµС‚СЃСЏ.'],solutions:['РџСЂР°РєС‚РёРєСѓР№ РїР°СѓР·Сѓ 10 СЃРµРєСѓРЅРґ РїРµСЂРµРґ РѕС‚РІРµС‚РѕРј РІ РЅР°РїСЂСЏР¶РµРЅРЅРѕР№ СЃРёС‚СѓР°С†РёРё.']};
+      if(s>=24)return{emoji:'рџ•',title:'РЎРЅРёР¶РµРЅРЅС‹Рµ РЅР°РІС‹РєРё EQ (MSCEIT adapt.)',text:'Р Р°СЃРїРѕР·РЅР°РІР°РЅРёРµ Рё СЂРµРіСѓР»СЏС†РёСЏ СЌРјРѕС†РёР№ РјРѕРіСѓС‚ Р±С‹С‚СЊ Р·Р°С‚СЂСѓРґРЅРµРЅС‹.',level:'high',causes:['Р˜РјРїСѓР»СЊСЃРёРІРЅС‹Рµ СЂРµР°РєС†РёРё СѓСЃРёР»РёРІР°СЋС‚ РєРѕРЅС„Р»РёРєС‚С‹ Рё С‚СЂРµРІРѕРіСѓ.'],solutions:['РџРѕР»РµР·РЅРѕ РѕС‚СЂР°Р±РѕС‚Р°С‚СЊ РЅР°РІС‹РєРё СЃР°РјРѕСЂРµРіСѓР»СЏС†РёРё СЃ РїСЃРёС…РѕР»РѕРіРѕРј.']};
+      return{emoji:'рџ†',title:'Р’С‹СЃРѕРєРёР№ СЂРёСЃРє СЌРјРѕС†РёРѕРЅР°Р»СЊРЅРѕР№ РґРµР·СЂРµРіСѓР»СЏС†РёРё',text:'РЎРµР№С‡Р°СЃ РІР°Р¶РЅРѕ РїРѕР»СѓС‡РёС‚СЊ РѕРїРѕСЂСѓ Рё Р±РµР·РѕРїР°СЃРЅСѓСЋ РїРѕРјРѕС‰СЊ.',level:'urgent',causes:['Р”Р»РёС‚РµР»СЊРЅС‹Рµ СЌРјРѕС†РёРѕРЅР°Р»СЊРЅС‹Рµ СЃСЂС‹РІС‹ СѓСЃРёР»РёРІР°СЋС‚ РёСЃС‚РѕС‰РµРЅРёРµ.'],solutions:['РћР±СЂР°С‚РёСЃСЊ Р·Р° РїРѕРјРѕС‰СЊСЋ Рє СЃРїРµС†РёР°Р»РёСЃС‚Сѓ РёР»Рё РЅР° Р»РёРЅРёСЋ РїРѕРґРґРµСЂР¶РєРё.']};
+    }
+  },
+};
+ 
+let curTest=null,curTestKey='',curQ=0,curAnswers=[];
+ 
+function startTest(key){
+  curTestKey=key;
+  curTest=tests[key]; curQ=0; curAnswers=[];
+  document.getElementById('tests-grid').style.display='none';
+  document.getElementById('quiz-wrap').classList.add('on');
+  renderQ();
+}
+ 
+function renderQ(){
+  if(curQ>=curTest.questions.length){showRes();return;}
+  const q=curTest.questions[curQ];
+  const prog=curTest.questions.map((_,i)=>`<div class="qd ${i<curQ?'done':''}"></div>`).join('');
+  document.getElementById('qProg').innerHTML=prog;
+  const saved=curAnswers[curQ];
+  document.getElementById('qContent').innerHTML=
+    `<div class="q-label">${curTest.name}</div>`+
+    `<div class="q-text">${curTest.desc}</div>`+
+    `<div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;margin-bottom:1rem;">${curQ+1}. ${q.q}</div>`+
+    `<div class="q-opts">${q.opts.map((o,i)=>`<button class="q-opt${saved===i?' sel':''}" onclick="pickOpt(this,${i})"><div class="q-num">${i+1}</div>${o}</button>`).join('')}</div>`+
+    `<div class="q-nav"><span class="q-counter">${curQ+1} РёР· ${curTest.questions.length}</span><button class="btn btn-o" id="nBtn" onclick="nextQ()" style="opacity:${saved!==undefined?'1':'.3'};pointer-events:${saved!==undefined?'all':'none'};">РґР°Р»РµРµ в†’</button></div>`;
+}
+ 
+function pickOpt(btn,idx){
+  document.querySelectorAll('.q-opt').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel');
+  curAnswers[curQ]=idx;
+  const nb=document.getElementById('nBtn');
+  nb.style.opacity='1'; nb.style.pointerEvents='all';
+}
+ 
+function nextQ(){
+  if(curAnswers[curQ]===undefined)return;
+  curQ++; renderQ();
+}
+
+function getAnswerValue(question, idx){
+  if(question && Array.isArray(question.values) && question.values[idx] !== undefined){
+    return question.values[idx];
+  }
+  return idx;
+}
+ 
+function showRes(){
+  const total=curAnswers.reduce((sum,answerIdx,questionIdx)=>{
+    return sum + getAnswerValue(curTest.questions[questionIdx], answerIdx);
+  },0);
+
+  let r=curTest.score(total);
+  let customText='';
+
+  if(curTestKey==='beck'){
+    if(total<=13){
+      r={emoji:'рџ™‚',title:'Р’СЃРµ РІ РїРѕСЂСЏРґРєРµ (РЅРѕСЂРјР°)',text:'РўРІРѕР№ СЌРјРѕС†РёРѕРЅР°Р»СЊРЅС‹Р№ С„РѕРЅ РІ РїСЂРµРґРµР»Р°С… РЅРѕСЂРјС‹. РќРµР·РЅР°С‡РёС‚РµР»СЊРЅС‹Рµ РєРѕР»РµР±Р°РЅРёСЏ вЂ” СЌС‚Рѕ РµСЃС‚РµСЃС‚РІРµРЅРЅРѕ. РўС‹ СЃРїСЂР°РІР»СЏРµС€СЊСЃСЏ!',level:'low',causes:[],solutions:['РџСЂРѕРґРѕР»Р¶Р°Р№ РїСЂРёСЃР»СѓС€РёРІР°С‚СЊСЃСЏ Рє СЃРµР±Рµ. РЎРµР№С‡Р°СЃ С…РѕСЂРѕС€РµРµ РІСЂРµРјСЏ Р·Р°РєСЂРµРїРёС‚СЊ РїРѕР»РµР·РЅС‹Рµ РїСЂРёРІС‹С‡РєРё Рё РѕС‚РґС‹С….']};
+    }else if(total<=19){
+      r={emoji:'рџ•',title:'Р›РµРіРєР°СЏ РґРµРїСЂРµСЃСЃРёСЏ (СЃСѓР±РґРµРїСЂРµСЃСЃРёСЏ)',text:'РџРѕС…РѕР¶Рµ, С‚С‹ С‡СѓРІСЃС‚РІСѓРµС€СЊ СѓРїР°РґРѕРє СЃРёР». Р­С‚Рѕ РјРѕР¶РµС‚ Р±С‹С‚СЊ СЃРІСЏР·Р°РЅРѕ СЃ РІС‹РіРѕСЂР°РЅРёРµРј РёР»Рё РІСЂРµРјРµРЅРЅС‹РјРё С‚СЂСѓРґРЅРѕСЃС‚СЏРјРё.',level:'mid',causes:['Р РµСЃСѓСЂСЃС‹ РјРѕРіСѓС‚ Р±С‹С‚СЊ РЅР° РјРёРЅРёРјСѓРјРµ, Рё СЌС‚Рѕ РЅРѕСЂРјР°Р»СЊРЅРѕ РІ РїРµСЂРёРѕРґ РІС‹СЃРѕРєРѕР№ РЅР°РіСЂСѓР·РєРё.'],solutions:['РЎРЅРёР·СЊ С‚СЂРµР±РѕРІР°РЅРёСЏ Рє СЃРµР±Рµ РЅР° Р±Р»РёР¶Р°Р№С€РёРµ РґРЅРё Рё РїРѕРїСЂРѕР±СѓР№ РѕР±СЃСѓР¶РґР°С‚СЊ С‡СѓРІСЃС‚РІР° СЃ Р±РµР·РѕРїР°СЃРЅС‹РјРё Р»СЋРґСЊРјРё.']};
+    }else if(total<=28){
+      r={emoji:'рџџ',title:'РЈРјРµСЂРµРЅРЅР°СЏ РґРµРїСЂРµСЃСЃРёСЏ',text:'РЎРѕСЃС‚РѕСЏРЅРёРµ СѓРєР°Р·С‹РІР°РµС‚ РЅР° РІС‹СЂР°Р¶РµРЅРЅСѓСЋ РґРµРїСЂРµСЃСЃРёРІРЅСѓСЋ СЃРёРјРїС‚РѕРјР°С‚РёРєСѓ. Р­С‚РѕС‚ СЃРёРіРЅР°Р» РІР°Р¶РЅРѕ РЅРµ РёРіРЅРѕСЂРёСЂРѕРІР°С‚СЊ.',level:'high',causes:['РљРѕРіРґР° С‚СЏР¶РµСЃС‚СЊ РґРµСЂР¶РёС‚СЃСЏ РґРѕР»РіРѕ, СЃРїСЂР°РІР»СЏС‚СЊСЃСЏ РІ РѕРґРёРЅРѕС‡РєСѓ СЃС‚Р°РЅРѕРІРёС‚СЃСЏ РЅР°РјРЅРѕРіРѕ СЃР»РѕР¶РЅРµРµ.'],solutions:['Р РµРєРѕРјРµРЅРґСѓРµС‚СЃСЏ РЅРµ РѕС‚РєР»Р°РґС‹РІР°С‚СЊ СЂР°Р·РіРѕРІРѕСЂ СЃ Р±Р»РёР·РєРёРј РІР·СЂРѕСЃР»С‹Рј РёР»Рё СЃРїРµС†РёР°Р»РёСЃС‚РѕРј.']};
+    }else{
+      r={emoji:'рџ†',title:'РўСЏР¶РµР»Р°СЏ РґРµРїСЂРµСЃСЃРёСЏ',text:'Р’С‹СЏРІР»РµРЅ РІС‹СЃРѕРєРёР№ СѓСЂРѕРІРµРЅСЊ РґРµРїСЂРµСЃСЃРёРІРЅС‹С… СЃРёРјРїС‚РѕРјРѕРІ. РЎРµР№С‡Р°СЃ РѕСЃРѕР±РµРЅРЅРѕ РІР°Р¶РЅР° Р¶РёРІР°СЏ РїРѕРґРґРµСЂР¶РєР° Рё Р±С‹СЃС‚СЂС‹Р№ РєРѕРЅС‚Р°РєС‚ СЃРѕ СЃРїРµС†РёР°Р»РёСЃС‚РѕРј.',level:'urgent',causes:['РЎРёР»СЊРЅР°СЏ СЃРёРјРїС‚РѕРјР°С‚РёРєР° вЂ” СЌС‚Рѕ РЅРµ СЃР»Р°Р±РѕСЃС‚СЊ, Р° СЃРѕСЃС‚РѕСЏРЅРёРµ, РєРѕС‚РѕСЂРѕРµ С‚СЂРµР±СѓРµС‚ РїРѕРјРѕС‰Рё Рё Р»РµС‡РёС‚СЃСЏ.'],solutions:['РЎР°РјС‹Р№ РІР°Р¶РЅС‹Р№ С€Р°Рі СЃРµР№С‡Р°СЃ вЂ” РѕР±СЂР°С‚РёС‚СЊСЃСЏ Р·Р° РїСЂРѕС„РµСЃСЃРёРѕРЅР°Р»СЊРЅРѕР№ РїРѕРґРґРµСЂР¶РєРѕР№.']};
+    }
+  }
+
+  const history = JSON.parse(localStorage.getItem('wm_test_history')||'{}');
+  const prev = history[curTestKey]?.[history[curTestKey].length-1];
+  history[curTestKey] = [...(history[curTestKey]||[]),{d:new Date().toISOString().slice(0,10),s:total}].slice(-20);
+  localStorage.setItem('wm_test_history',JSON.stringify(history));
+
+  let trendHtml='';
+  if(prev){
+    const diff = total - prev.s;
+    const trend = diff===0 ? 'Р±РµР· РёР·РјРµРЅРµРЅРёР№' : (diff<0 ? `Р»СѓС‡С€Рµ РЅР° ${Math.abs(diff)} Р±Р°Р»Р»(РѕРІ)` : `РІС‹С€Рµ РЅР° ${diff} Р±Р°Р»Р»(РѕРІ)`);
+    trendHtml = `<div class="r-tip">рџ“€ Р”РёРЅР°РјРёРєР°: РІ РїСЂРѕС€Р»С‹Р№ СЂР°Р· Р±С‹Р»Рѕ ${prev.s}, СЃРµР№С‡Р°СЃ ${total} (${trend}).</div>`;
+  }
+
+  const routeMap={
+    urgent:`<button class="route-btn route-urgent" onclick="pg('help')">рџ† Р­РљРЎРўР Р•РќРќРђРЇ РџРћРњРћР©Р¬</button><button class="route-btn route-self" onclick="pg('community')">рџЏ  Р—Р°Р№С‚Рё РІ СЃРѕРѕР±С‰РµСЃС‚РІРѕ</button><button class="route-btn route-talk" onclick="openAuthSoon('Р”Р»СЏ Р°РЅРѕРЅРёРјРЅРѕРіРѕ С‡Р°С‚Р° РЅСѓР¶РµРЅ РІС…РѕРґ. Р¤СѓРЅРєС†РёСЏ СЃРєРѕСЂРѕ.')">рџ’¬ РђРЅРѕРЅРёРјРЅС‹Р№ С‡Р°С‚</button>`,
+    high:`<button class="route-btn route-urgent" onclick="pg('help')">рџ“ћ РџРѕРјРѕС‰СЊ СЃРїРµС†РёР°Р»РёСЃС‚РѕРІ</button><button class="route-btn route-self" onclick="pg('community')">рџЏ  РћР±СЃСѓРґРёС‚СЊ РІ СЃРѕРѕР±С‰РµСЃС‚РІРµ</button><button class="route-btn route-talk" onclick="openAuthSoon('Р”Р»СЏ Р°РЅРѕРЅРёРјРЅРѕРіРѕ С‡Р°С‚Р° РЅСѓР¶РµРЅ РІС…РѕРґ. Р¤СѓРЅРєС†РёСЏ СЃРєРѕСЂРѕ.')">рџ’¬ РђРЅРѕРЅРёРјРЅС‹Р№ С‡Р°С‚</button>`,
+    mid:`<button class="route-btn route-self" onclick="pg('community')">рџЏ  РћР±СЃСѓРґРёС‚СЊ РІ СЃРѕРѕР±С‰РµСЃС‚РІРµ</button><button class="route-btn route-talk" onclick="pg('help')">рџ“ћ РџРѕРјРѕС‰СЊ Рё СЂРµСЃСѓСЂСЃС‹</button>`,
+    low:`<button class="route-btn route-self" onclick="pg('community')">рџЏ  Р—Р°Р№С‚Рё РІ СЃРѕРѕР±С‰РµСЃС‚РІРѕ</button><button class="route-btn route-talk" onclick="renderGraph();pg('home')">рџ“Љ РўСЂРµРєРµСЂ РЅР°СЃС‚СЂРѕРµРЅРёСЏ</button>`
+  };
+
+  const causesHtml=r.causes.length?`<div class="r-section"><div class="r-sec-title">РџРѕС‡РµРјСѓ С‚Р°Рє РїСЂРѕРёСЃС…РѕРґРёС‚</div>${r.causes.map(c=>`<div class="r-tip">вљЎ ${c}</div>`).join('')}</div>`:'';
+  const solHtml=`<div class="r-section"><div class="r-sec-title">Р§С‚Рѕ РґРµР»Р°С‚СЊ</div>${r.solutions.map(s=>`<div class="r-tip">рџ’Ў ${s}</div>`).join('')}</div>`;
+  const disclaimer=`<p class="r-text" style="font-size:.83rem;margin-top:1rem;border-top:1px dashed var(--border);padding-top:1rem;"><em>Р’Р°Р¶РЅРѕ: СЂРµР·СѓР»СЊС‚Р°С‚ С‚РµСЃС‚Р° РЅРµ СЏРІР»СЏРµС‚СЃСЏ РјРµРґРёС†РёРЅСЃРєРёРј РґРёР°РіРЅРѕР·РѕРј. РС‚РѕРі РѕС‚СЂР°Р¶Р°РµС‚ С‚РІРѕРµ СЃРѕСЃС‚РѕСЏРЅРёРµ РІ РјРѕРјРµРЅС‚Рµ Рё РјРѕР¶РµС‚ СЃР»СѓР¶РёС‚СЊ С‚РѕР»СЊРєРѕ РѕСЂРёРµРЅС‚РёСЂРѕРј РґР»СЏ СЃР°РјРѕСЂРµС„Р»РµРєСЃРёРё Рё РѕР±СЂР°С‰РµРЅРёСЏ Рє СЃРїРµС†РёР°Р»РёСЃС‚Сѓ.</em></p>`;
+  const nextStep=`<div class="r-section"><div class="r-sec-title">Р§С‚Рѕ РґРµР»Р°С‚СЊ РґР°Р»СЊС€Рµ?</div><div class="r-tip">рџ’¬ РњРЅРµ РЅСѓР¶РЅРѕ РІС‹РіРѕРІРѕСЂРёС‚СЊСЃСЏ: <span onclick="pg('community')" style="cursor:pointer;color:var(--orange2);font-weight:700;">РѕС‚РєСЂС‹С‚СЊ СЃРѕРѕР±С‰РµСЃС‚РІРѕ</span></div><div class="r-tip">рџЊ¬ РЇ С…РѕС‡Сѓ СѓСЃРїРѕРєРѕРёС‚СЊСЃСЏ: <span onclick="pg('help')" style="cursor:pointer;color:var(--orange2);font-weight:700;">РїРµСЂРµР№С‚Рё РІ РїРѕРјРѕС‰СЊ</span></div><div class="r-tip">рџ“ћ РњРЅРµ РЅСѓР¶РЅР° РїРѕРјРѕС‰СЊ: <span onclick="pg('help')" style="cursor:pointer;color:var(--orange2);font-weight:700;">РєРѕРЅС‚Р°РєС‚С‹ СЃРїРµС†РёР°Р»РёСЃС‚РѕРІ</span></div></div>`;
+
+  document.getElementById('qContent').innerHTML=
+    `<div class="r-wrap">`+
+    `<div class="r-emoji">${r.emoji}</div>`+
+    `<div class="r-score">Р РµР·СѓР»СЊС‚Р°С‚: ${total} Р±Р°Р»Р»РѕРІ</div>`+
+    `<div class="r-title">${r.title}</div>`+
+    `<p class="r-text">${r.text}</p>`+
+    `<div class="r-routes">${routeMap[r.level]}</div>`+
+    `${trendHtml}`+
+    causesHtml+solHtml+nextStep+customText+disclaimer+
+    `<div style="margin-top:1.2rem;"><button class="btn btn-g" onclick="backToTests()">в†ђ РІСЃРµ С‚РµСЃС‚С‹</button></div>`+
+    `</div>`;
+}
+ 
+function backToTests(){
+  document.getElementById('tests-grid').style.display='grid';
+  document.getElementById('quiz-wrap').classList.remove('on');
+}
+ 
+const wins=[
+  ['Р’С‹РїРµР№ СЃС‚Р°РєР°РЅ РІРѕРґС‹ РїСЂСЏРјРѕ СЃРµР№С‡Р°СЃ рџ’§','РўРµР»Рѕ РїСЂРѕСЃРёС‚ РІРѕРґС‹ РіРѕСЂР°Р·РґРѕ С‡Р°С‰Рµ С‡РµРј РєР°Р¶РµС‚СЃСЏ'],
+  ['РЈРјРѕР№СЃСЏ РїСЂРѕС…Р»Р°РґРЅРѕР№ РІРѕРґРѕР№ рџ’¦','РҐРѕР»РѕРґРЅР°СЏ РІРѕРґР° РјРіРЅРѕРІРµРЅРЅРѕ СЃРЅРёР¶Р°РµС‚ С‚СЂРµРІРѕРіСѓ'],
+  ['РџСЂРѕРІРµС‚СЂРё РєРѕРјРЅР°С‚Сѓ 2 РјРёРЅСѓС‚С‹ рџЄџ','РЎРІРµР¶РёР№ РІРѕР·РґСѓС… = Р±РѕР»СЊС€Рµ РєРёСЃР»РѕСЂРѕРґР° = Р»СѓС‡С€Рµ РґСѓРјР°РµС‚СЃСЏ'],
+  ['Р’СЃС‚Р°РЅСЊ Рё РїРѕС‚СЏРЅРёСЃСЊ 30 СЃРµРєСѓРЅРґ рџ™†','РўРµР»Рѕ С…СЂР°РЅРёС‚ СЃС‚СЂРµСЃСЃ вЂ” РґРІРёР¶РµРЅРёРµ РµРіРѕ РІС‹СЃРІРѕР±РѕР¶РґР°РµС‚'],
+  ['РќР°РїРёС€Рё РѕРґРЅРѕРјСѓ С‡РµР»РѕРІРµРєСѓ В«РїСЂРёРІРµС‚В» рџ’¬','РћРґРёРЅ РєРѕРЅС‚Р°РєС‚ вЂ” СѓР¶Рµ РјРµРЅСЊС€Рµ РѕРґРёРЅРѕС‡РµСЃС‚РІР°'],
+  ['РќР°Р№РґРё РІРѕРєСЂСѓРі 3 СЂР°Р·РЅС‹С… С†РІРµС‚Р° рџЋЁ','Р­С‚Рѕ С‚РµС…РЅРёРєР° Р·Р°Р·РµРјР»РµРЅРёСЏ вЂ” РІРѕР·РІСЂР°С‰Р°РµС‚ РІ В«Р·РґРµСЃСЊ Рё СЃРµР№С‡Р°СЃВ»'],
+  ['РЎСЉРµС€СЊ С‡С‚Рѕ-РЅРёР±СѓРґСЊ РµСЃР»Рё РЅРµ РµР» Р±РѕР»СЊС€Рµ 4 С‡Р°СЃРѕРІ рџЌЋ','РњРѕР·РіСѓ РЅСѓР¶РЅР° СЌРЅРµСЂРіРёСЏ вЂ” Р±РµР· РµРґС‹ РІСЃС‘ РєР°Р¶РµС‚СЃСЏ С…СѓР¶Рµ'],
+  ['РЎРґРµР»Р°Р№ 10 РіР»СѓР±РѕРєРёС… РІРґРѕС…РѕРІ рџЊ¬пёЏ','Р”С‹С…Р°РЅРёРµ вЂ” СЃР°РјС‹Р№ Р±С‹СЃС‚СЂС‹Р№ СЃРїРѕСЃРѕР± СѓСЃРїРѕРєРѕРёС‚СЊ РЅРµСЂРІРЅСѓСЋ СЃРёСЃС‚РµРјСѓ'],
+  ['РџРѕР»РѕР¶Рё С‚РµР»РµС„РѕРЅ РЅР° 15 РјРёРЅСѓС‚ РІ РґСЂСѓРіСѓСЋ РєРѕРјРЅР°С‚Сѓ рџ“µ','РџСЂРѕСЃС‚Рѕ РїРѕРїСЂРѕР±СѓР№ вЂ” СЌС‚Рѕ СЃР»РѕР¶РЅРµРµ С‡РµРј РєР°Р¶РµС‚СЃСЏ'],
+  ['Р—Р°РїРёС€Рё РѕРґРЅСѓ РІРµС‰СЊ Р·Р° РєРѕС‚РѕСЂСѓСЋ С‚С‹ Р±Р»Р°РіРѕРґР°СЂРµРЅ вњЏпёЏ','Р­С‚Рѕ РїРµСЂРµСЃС‚СЂР°РёРІР°РµС‚ С„РѕРєСѓСЃ РјРѕР·РіР° СЃ РЅРµРіР°С‚РёРІР° РЅР° РїРѕР·РёС‚РёРІ'],
+];
+ 
+function getWin(){
+  const[task,sub]=wins[Math.floor(Math.random()*wins.length)];
+  document.getElementById('winsTask').textContent=task;
+  document.getElementById('winsSub').textContent=sub;
+  document.getElementById('winsDone').style.display='flex';
+  document.getElementById('winsAch').style.display='none';
+}
+ 
+function doneWin(){
+  document.getElementById('winsDone').style.display='none';
+  document.getElementById('winsAch').style.display='block';
+  document.getElementById('winsTask').textContent='РњРѕР»РѕРґРµС† рџЋ‰';
+  document.getElementById('winsSub').textContent='РЎРµСЂСЊС‘Р·РЅРѕ вЂ” СЌС‚Рѕ РІР°Р¶РЅРµРµ С‡РµРј РєР°Р¶РµС‚СЃСЏ';
+}
+ 
+const EXTRA_KEYS={
+  theme:'wm_theme',
+  stories:'wm_stories',
+  support:'wm_support_requests'
+};
+const STORY_REACTIONS=['рџ«¶','рџ’›','рџ«‚','рџ”Ґ'];
+const STORY_PROMPTS=[
+  'РЎРµРіРѕРґРЅСЏ Р±С‹Р»Рѕ С‚СЏР¶РµР»Рѕ РёР·-Р·Р° СѓС‡С‘Р±С‹, Рё СЏ РЅРµ Р·РЅР°СЋ, РєР°Рє РѕС‚ СЌС‚РѕРіРѕ РїРµСЂРµРєР»СЋС‡РёС‚СЊСЃСЏ.',
+  'РРЅРѕРіРґР° РІРѕРєСЂСѓРі Р»СЋРґРё РµСЃС‚СЊ, Р° РІРЅСѓС‚СЂРё РІСЃС‘ СЂР°РІРЅРѕ РѕС‡РµРЅСЊ РѕРґРёРЅРѕРєРѕ.',
+  'РҐРѕС‡Сѓ РЅР°РїРёСЃР°С‚СЊ С‡РµСЃС‚РЅРѕ: СЏ СѓСЃС‚Р°Р» РґРµР»Р°С‚СЊ РІРёРґ, С‡С‚Рѕ РІСЃС‘ РЅРѕСЂРјР°Р»СЊРЅРѕ.'
+];
+
+function getStoredList(key,fallback=[]){
+  try{return JSON.parse(localStorage.getItem(key)||JSON.stringify(fallback));}
+  catch{return fallback;}
+}
+
+function setStoredList(key,value){
+  localStorage.setItem(key,JSON.stringify(value));
+}
+
+function toggleTheme(){
+  const light=!document.body.classList.contains('light');
+  document.body.classList.toggle('light',light);
+  localStorage.setItem(EXTRA_KEYS.theme,light?'light':'dark');
+}
+
+function applySavedTheme(){
+  document.body.classList.toggle('light',localStorage.getItem(EXTRA_KEYS.theme)==='light');
+}
+
+function prefillStory(){
+  const input=document.getElementById('storyInput');
+  if(input && !input.value.trim())input.value=STORY_PROMPTS[Math.floor(Math.random()*STORY_PROMPTS.length)];
+}
+
+function getStories(){
+  return getStoredList(EXTRA_KEYS.stories,[
+    {id:'seed-1',text:'РРЅРѕРіРґР° РєР°Р¶РµС‚СЃСЏ, С‡С‚Рѕ РІСЃРµ РІРѕРєСЂСѓРі СЃРїСЂР°РІР»СЏСЋС‚СЃСЏ Р»СѓС‡С€Рµ РјРµРЅСЏ, С…РѕС‚СЏ СЏ СѓР¶Рµ РІС‹Р¶Р°С‚.',reactions:{'рџ«¶':4,'рџ’›':2,'рџ«‚':1,'рџ”Ґ':0},createdAt:'СЃРµРіРѕРґРЅСЏ'},
+    {id:'seed-2',text:'РҐРѕС‡Сѓ РїСЂРѕСЃС‚Рѕ РЅР°РїРѕРјРЅРёС‚СЊ РєРѕРјСѓ-С‚Рѕ РµС‰С‘: РїРµСЂРµР¶РёРІР°С‚СЊ Рё РїСЂРѕСЃРёС‚СЊ РїРѕРјРѕС‰Рё РЅРµ СЃС‚С‹РґРЅРѕ.',reactions:{'рџ«¶':6,'рџ’›':3,'рџ«‚':2,'рџ”Ґ':1},createdAt:'РІС‡РµСЂР°'}
+  ]);
+}
+
+function getSupportRequests(){
+  return getStoredList(EXTRA_KEYS.support,[
+    {id:'support-1',text:'РњРЅРµ РѕС‡РµРЅСЊ С‚СЂРµРІРѕР¶РЅРѕ РїРµСЂРµРґ СЌРєР·Р°РјРµРЅР°РјРё, С…РѕС‡РµС‚СЃСЏ РїСЂРѕСЃС‚Рѕ С‡С‚РѕР±С‹ РєС‚Рѕ-С‚Рѕ СЃРєР°Р·Р°Р», С‡С‚Рѕ СЏ СЃРїСЂР°РІР»СЋСЃСЊ.',createdAt:'СЃРµРіРѕРґРЅСЏ'},
+    {id:'support-2',text:'РЎРЅРѕРІР° С‚СЏР¶РµР»Рѕ РґРѕРјР°. РҐРѕС‡Сѓ РїСЂРѕСЃС‚Рѕ РІС‹РіРѕРІРѕСЂРёС‚СЊСЃСЏ Рё РЅРµ С‡СѓРІСЃС‚РІРѕРІР°С‚СЊ СЃРµР±СЏ СЃС‚СЂР°РЅРЅРѕ.',createdAt:'РІС‡РµСЂР°'}
+  ]);
+}
+
+function submitStory(){
+  openAuthSoon('Р§С‚РѕР±С‹ РїСѓР±Р»РёРєРѕРІР°С‚СЊ РёСЃС‚РѕСЂРёСЋ, РІРѕР№РґРё РІ Р°РєРєР°СѓРЅС‚. РџРѕР»РЅС‹Р№ РІС…РѕРґ РїРѕ Р»РѕРіРёРЅСѓ Рё РїР°СЂРѕР»СЋ РїРѕСЏРІРёС‚СЃСЏ СЃРєРѕСЂРѕ.');
+  return;
+  const input=document.getElementById('storyInput');
+  const text=input?.value.trim();
+  if(!text)return;
+  const stories=getStories();
+  stories.unshift({id:String(Date.now()),text,reactions:{'рџ«¶':0,'рџ’›':0,'рџ«‚':0,'рџ”Ґ':0},createdAt:'С‚РѕР»СЊРєРѕ С‡С‚Рѕ'});
+  setStoredList(EXTRA_KEYS.stories,stories);
+  input.value='';
+  renderStories();
+  renderDigest();
+}
+
+function submitSupport(){
+  openAuthSoon('Р§С‚РѕР±С‹ РѕС‚РїСЂР°РІРёС‚СЊ РїРѕСЃС‚ РїРѕРґРґРµСЂР¶РєРё, РЅСѓР¶РµРЅ РІС…РѕРґ РІ Р°РєРєР°СѓРЅС‚. Р¤СѓРЅРєС†РёСЏ РІС…РѕРґР° СЃРєРѕСЂРѕ.');
+  return;
+  const input=document.getElementById('supportInput');
+  const text=input?.value.trim();
+  if(!text)return;
+  const items=getSupportRequests();
+  items.unshift({id:String(Date.now()),text,createdAt:'С‚РѕР»СЊРєРѕ С‡С‚Рѕ'});
+  setStoredList(EXTRA_KEYS.support,items);
+  input.value='';
+  renderSupport();
+  renderDigest();
+}
+
+function reactStory(id,emoji){
+  const stories=getStories().map(story=>{
+    if(story.id===id)story.reactions[emoji]=(story.reactions[emoji]||0)+1;
+    return story;
+  });
+  setStoredList(EXTRA_KEYS.stories,stories);
+  renderStories();
+  renderDigest();
+}
+
+function renderStories(){
+  const list=document.getElementById('storyList');
+  if(!list)return;
+  list.innerHTML=getStories().slice(0,6).map(story=>`
+    <div class="story-card">
+      <div class="story-meta">Р°РЅРѕРЅРёРјРЅРѕ В· ${story.createdAt}</div>
+      <div class="story-body">${story.text}</div>
+      <div class="reaction-row">
+        ${STORY_REACTIONS.map(emoji=>`<button class="reaction-btn" onclick="reactStory('${story.id}','${emoji}')">${emoji} ${story.reactions[emoji]||0}</button>`).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderSupport(){
+  const list=document.getElementById('supportList');
+  if(!list)return;
+  list.innerHTML=getSupportRequests().slice(0,6).map(item=>`
+    <div class="support-card">
+      <div class="support-meta">Р·Р°РїСЂРѕСЃ РїРѕРґРґРµСЂР¶РєРё В· ${item.createdAt}</div>
+      <div class="support-body">${item.text}</div>
+      <div class="feature-text">РњРѕР¶РЅРѕ РѕС‚РІРµС‚РёС‚СЊ СЂРµР°РєС†РёРµР№ РІ РёСЃС‚РѕСЂРёСЏС…, РїРѕРґРґРµСЂР¶Р°С‚СЊ РІ СЃРѕРѕР±С‰РµСЃС‚РІРµ РёР»Рё РїРµСЂРµР№С‚Рё РІ СЂР°Р·РґРµР» РїРѕРјРѕС‰Рё.</div>
+    </div>
+  `).join('');
+}
+
+function renderDigest(){
+  const digest=document.getElementById('digestGrid');
+  if(!digest)return;
+  const stories=getStories();
+  const support=getSupportRequests();
+  const moodHistory=JSON.parse(localStorage.getItem('wm_mood')||'{}');
+  const moodValues=Object.values(moodHistory);
+  const avgMood=moodValues.length?(moodValues.reduce((a,b)=>a+b,0)/moodValues.length).toFixed(1):'вЂ”';
+  const topReaction=stories.reduce((acc,story)=>{
+    STORY_REACTIONS.forEach(emoji=>acc[emoji]=(acc[emoji]||0)+(story.reactions[emoji]||0));
+    return acc;
+  },{});
+  const reactionWinner=Object.entries(topReaction).sort((a,b)=>b[1]-a[1])[0]?.[0]||'рџ«¶';
+  digest.innerHTML=`
+    <div class="digest-card"><div class="feature-kicker">РСЃС‚РѕСЂРёРё</div><div class="digest-big">${stories.length}</div><div class="feature-text">Р°РЅРѕРЅРёРјРЅС‹С… РёСЃС‚РѕСЂРёР№ РІ Р»РѕРєР°Р»СЊРЅРѕР№ Р»РµРЅС‚Рµ</div></div>
+    <div class="digest-card"><div class="feature-kicker">РџРѕРґРґРµСЂР¶РєР°</div><div class="digest-big">${support.length}</div><div class="feature-text">Р·Р°РїСЂРѕСЃРѕРІ В«РјРЅРµ РїР»РѕС…РѕВ» Р·Р°С„РёРєСЃРёСЂРѕРІР°РЅРѕ</div></div>
+    <div class="digest-card"><div class="feature-kicker">РќР°СЃС‚СЂРѕРµРЅРёРµ</div><div class="digest-big">${avgMood}</div><div class="feature-text">СЃСЂРµРґРЅРёР№ Р±Р°Р»Р» РЅР°СЃС‚СЂРѕРµРЅРёСЏ РїРѕ Р¶СѓСЂРЅР°Р»Сѓ</div></div>
+    <div class="digest-card"><div class="feature-kicker">РўРѕРЅ СЃРѕРѕР±С‰РµСЃС‚РІР°</div><div class="digest-big">${reactionWinner}</div><div class="feature-text">СЃР°РјР°СЏ С‡Р°СЃС‚Р°СЏ СЂРµР°РєС†РёСЏ РїРѕРґРґРµСЂР¶РєРё</div></div>
+  `;
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+  applySavedTheme();
+  renderStories();
+  renderSupport();
+  renderDigest();
+  document.addEventListener('click',e=>{
+    const drawer=document.getElementById('menuDrawer');
+    if(!drawer?.classList.contains('on'))return;
+    if(e.target.closest('.menu-btn')||e.target.closest('.menu-drawer'))return;
+    closeMenu();
+  });
+  document.addEventListener('click',e=>{
+    const auth=document.getElementById('authSoon');
+    if(!auth?.classList.contains('on'))return;
+    if(e.target.closest('.auth-card'))return;
+    closeAuthSoon();
+  });
+  document.addEventListener('keydown',e=>{
+    if(e.key==='Escape'){
+      closeAuthSoon();
+      closeMenu();
+    }
+  });
+});
+</script>
+</body>
+</html>
+
